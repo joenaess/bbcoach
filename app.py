@@ -501,10 +501,20 @@ with tab1:
 
                 # Data Table
                 st.subheader("Head-to-Head Stats")
+
+                # Map team name for display
+                team_id_map = dict(zip(teams_df["id"], teams_df["name"]))
+                comparison_df["team"] = (
+                    comparison_df["team_id"]
+                    .astype(str)
+                    .map(team_id_map)
+                    .fillna(comparison_df["team_id"])
+                )
+
                 st.dataframe(
                     comparison_df[["name", "team", "PPG", "RPG", "APG", "3P%"]],
                     hide_index=True,
-                )  # Removed fields not present in raw df for safety
+                )
 
     # ------------------------------------------------------------------
     # TAB 3: Game Predictor

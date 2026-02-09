@@ -55,8 +55,60 @@ def create_radar_chart(player_stats: pd.DataFrame, metrics: List[str] = None):
     return fig
 
 
-def create_trend_line(team_name: str, games_df: pd.DataFrame):
+def create_win_loss_trend(team_name: str):
     """
-    Placeholder for trend line. Requires game log data which we might not have fully parsed yet.
+    Creates a trend line of cumulative wins/losses over a simulated season.
+    Mocks data for now as we don't have game logs.
     """
-    pass
+    import numpy as np
+
+    # Simulate 30 games
+    games = 30
+
+    # deterministic seed based on team name length for consistency
+    np.random.seed(len(team_name))
+
+    # Base win probability (0.3 to 0.7)
+    win_prob = 0.3 + (len(team_name) % 5) * 0.1
+
+    results = np.random.choice([1, 0], size=games, p=[win_prob, 1 - win_prob])
+    cumulative_wins = np.cumsum(results)
+    cumulative_losses = np.cumsum(1 - results)
+
+    # Net Score (Win - Loss)
+    net_score = cumulative_wins - cumulative_losses
+
+    df = pd.DataFrame(
+        {
+            "Game": range(1, games + 1),
+            "Net Score": net_score,
+            "Result": ["Win" if r == 1 else "Loss" for r in results],
+        }
+    )
+
+    fig = go.Figure()
+
+    # Color based on value (Green for positive, Red for negative)
+    fig.add_trace(
+        go.Scatter(
+            x=df["Game"],
+            y=df["Net Score"],
+            mode="lines+markers",
+            name="Net Performance",
+            line=dict(color="#FF5722", width=3),
+            marker=dict(
+                size=8, color=["green" if r == "Win" else "red" for r in df["Result"]]
+            ),
+        )
+    )
+
+    fig.update_layout(
+        title=f"Season Momentum: {team_name} (Simulated)",
+        xaxis_title="Game Number",
+        yaxis_title="Net Wins (Wins - Losses)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
+    )
+
+    return fig
