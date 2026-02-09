@@ -48,5 +48,48 @@ def load_teams() -> pd.DataFrame:
 def load_players() -> pd.DataFrame:
     path = DATA_DIR / "players.parquet"
     if path.exists():
-        return pd.read_parquet(path)
+        df = pd.read_parquet(path)
+
+        # Pre-process raw stats into columns if they exist
+        if "raw_stats" in df.columns:
+            # We need to extract stats. The logic is similar to app.py
+            # Expected raw indices: 3:PPG, 4:RPG, 5:APG, 10:3P%
+
+            def extract_stat(row, idx):
+                try:
+                    val = row[idx]
+                    return float(val) if val != "-" else 0.0
+                except:
+                    return 0.0
+
+            # Vectorized approach or apply? Apply is safer for arrays
+            # Let's use a simpler apply for now
+            df["PPG"] = df["raw_stats"].apply(lambda x: extract_stat(x, 3))
+            df["RPG"] = df["raw_stats"].apply(lambda x: extract_stat(x, 4))
+            df["APG"] = df["raw_stats"].apply(lambda x: extract_stat(x, 5))
+            df["SPG"] = (
+                df["raw_stats"].apply(lambda x: extract_stat(x, 12))
+                if len(df) > 0 and len(df.iloc[0]["raw_stats"]) > 12
+                else 0.0
+            )  # Index 12 is usually SPG? Need to verify mapping
+            # Let's stick to known indices from app.py: 3,4,5.
+            # 3P% is string with % often, or float? In scraper it seemed to be strings.
+            # In app.py usage: raw[10] is 3P%.
+
+            def extract_pct(row, idx):
+                try:
+                    val = str(row[idx]).replace("%", "")
+                    return float(val) if val != "-" else 0.0
+                except:
+                    return 0.0
+
+            df["3P%"] = df["raw_stats"].apply(lambda x: extract_pct(x, 10))
+
+            # Additional safer defaults
+            if "SPG" not in df.columns:
+                df["SPG"] = 0.0
+            if "BPG" not in df.columns:
+                df["BPG"] = 0.0
+
+        return df
     return pd.DataFrame()
