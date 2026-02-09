@@ -83,51 +83,72 @@ with st.sidebar:
 
     # 1. API Keys & Provider
     with st.expander("Configure AI Models", expanded=False):
-        provider = st.selectbox(
-            "Select AI Provider",
-            [
-                "Local (Qwen 2.5)",
-                "Google Gemini",
-                "OpenAI (GPT-4o)",
-                "Anthropic (Claude 3.5)",
-            ],
-            index=1 if os.getenv("GEMINI_API_KEY") else 0,
+        # Check available keys
+        has_gemini = bool(os.getenv("GEMINI_API_KEY"))
+        has_openai = bool(os.getenv("OPENAI_API_KEY"))
+        has_anthropic = bool(os.getenv("ANTHROPIC_API_KEY"))
+
+        provider_options = ["Local (Qwen 2.5)"]
+        provider_options.append(f"Google Gemini {'✅' if has_gemini else '❌'}")
+        provider_options.append(f"OpenAI (GPT-4o) {'✅' if has_openai else '❌'}")
+        provider_options.append(
+            f"Anthropic (Claude 3.5) {'✅' if has_anthropic else '❌'}"
         )
 
+        # Determine default index based on what's available
+        default_idx = 0
+        if has_gemini:
+            default_idx = 1
+        elif has_openai:
+            default_idx = 2
+        elif has_anthropic:
+            default_idx = 3
+
+        selected_provider_label = st.selectbox(
+            "Select AI Provider", provider_options, index=default_idx
+        )
+
+        # Map label back to internal code
+        provider = "local"
+        if "Gemini" in selected_provider_label:
+            provider = "gemini"
+        elif "OpenAI" in selected_provider_label:
+            provider = "openai"
+        elif "Anthropic" in selected_provider_label:
+            provider = "anthropic"
+
         api_key_input = ""
-        if "Gemini" in provider:
+        st.session_state["ai_provider"] = provider  # Default
+
+        if provider == "gemini":
             api_key_input = st.text_input(
                 "Gemini API Key", value=os.getenv("GEMINI_API_KEY", ""), type="password"
             )
-            st.session_state["ai_provider"] = "gemini"
             st.session_state["ai_key"] = api_key_input
-        elif "OpenAI" in provider:
+        elif provider == "openai":
             api_key_input = st.text_input(
                 "OpenAI API Key", value=os.getenv("OPENAI_API_KEY", ""), type="password"
             )
-            st.session_state["ai_provider"] = "openai"
             st.session_state["ai_key"] = api_key_input
-        elif "Anthropic" in provider:
+        elif provider == "anthropic":
             api_key_input = st.text_input(
                 "Anthropic API Key",
                 value=os.getenv("ANTHROPIC_API_KEY", ""),
                 type="password",
             )
-            st.session_state["ai_provider"] = "anthropic"
             st.session_state["ai_key"] = api_key_input
         else:
-            st.session_state["ai_provider"] = "local"
             st.session_state["ai_key"] = None
 
         # Model Selection Logic
         model_options = []
         default_idx = 0
 
-        if "Gemini" in provider:
+        if provider == "gemini":
             model_options = ["gemini-2.0-flash", "gemini-1.5-pro", "gemini-1.5-flash"]
-        elif "OpenAI" in provider:
+        elif provider == "openai":
             model_options = ["gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"]
-        elif "Anthropic" in provider:
+        elif provider == "anthropic":
             model_options = [
                 "claude-3-5-sonnet-latest",
                 "claude-3-opus-latest",
@@ -563,9 +584,16 @@ elif page == "Coach's Corner":
                         pass
 
             response = st.session_state.coach.ask(context, prompt)
-            message_placeholder.markdown(response)
 
-        st.session_state.messages.append({"role": "assistant", "content": response})
+            # Show which model was used
+            used_model = st.session_state.coach.get_model_info()
+            final_response = f"**{used_model}**\n\n{response}"
+
+            message_placeholder.markdown(final_response)
+
+        st.session_state.messages.append(
+            {"role": "assistant", "content": final_response}
+        )
 
 # Sidebar Analysis Tools (Updated to write to file)
 with st.sidebar.expander("Analysis Tools"):

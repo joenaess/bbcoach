@@ -128,13 +128,14 @@ class BasketballCoach:
             return f"Error executing AI request ({self.provider}): {str(e)}"
 
     def get_model_info(self) -> str:
-        icons = {
-            "gemini": "Googe Gemini 2.0 Flash ⚡",
-            "openai": "OpenAI GPT-4o 🧠",
-            "anthropic": "Claude 3.5 Sonnet 🎭",
-            "local": f"Local Model ({LOCAL_MODEL_NAME}) 💻",
-        }
-        return icons.get(self.provider, "Unknown Model")
+        if self.provider == "local":
+            return f"Local Model ({LOCAL_MODEL_NAME}) 💻"
+
+        model = self.model_name if self.model_name else "Default"
+
+        icons = {"gemini": "⚡", "openai": "🧠", "anthropic": "🎭", "local": "💻"}
+        icon = icons.get(self.provider, "🤖")
+        return f"{self.provider.title()} ({model}) {icon}"
 
 
 if __name__ == "__main__":
