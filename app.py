@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import sys
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Add src to path
 sys.path.append(os.path.abspath("src"))
@@ -490,12 +493,15 @@ with tab1:
                 p2_stats = players_df[players_df["name"] == p2_name].iloc[0]
 
                 # Prepare data for chart
-                comparison_df = players_df[players_df["name"].isin([p1_name, p2_name])]
+                comparison_df = players_df[
+                    players_df["name"].isin([p1_name, p2_name])
+                ].copy()
 
                 # Render Chart
                 fig = create_radar_chart(comparison_df)
                 if fig:
-                    st.plotly_chart(fig, use_container_width=True)
+                    # use_container_width=True is deprecated
+                    st.plotly_chart(fig)
                 else:
                     st.warning("Not enough data to generate chart.")
 
@@ -520,51 +526,119 @@ with tab1:
     # TAB 3: Game Predictor
     # ------------------------------------------------------------------
     with tab3:
-        st.header("Matchup Predictor")
+        st.header("Matchup & Scouting")
 
-        # Team Selection for Opponent
-        opponent_name = st.selectbox("Select Opponent", teams_df["name"].unique())
-        opponent_record = teams_df[teams_df["name"] == opponent_name]
+        # Sub-tabs for Predictor vs Scouting Report
+        subtab_pred, subtab_scout = st.tabs(["🔮 Game Predictor", "📋 Scouting Report"])
 
-        season = st.selectbox(
-            "Season", sorted(players_df["season"].unique(), reverse=True)
-        )
-        use_multi_season = st.checkbox(
-            "Include Multi-Season Trend Analysis?", value=False
-        )
+        with subtab_pred:
+            # Team Selection for Opponent
+            opponent_name = st.selectbox(
+                "Select Opponent", teams_df["name"].unique(), key="pred_opp"
+            )
+            opponent_record = teams_df[teams_df["name"] == opponent_name]
 
-        if st.button("Analyze Matchup"):
-            if not opponent_record.empty and st.session_state.get("coach_team"):
-                opp_id = opponent_record.iloc[0]["id"]
+            season = st.selectbox(
+                "Season",
+                sorted(players_df["season"].unique(), reverse=True),
+                key="pred_season",
+            )
+            use_multi_season = st.checkbox(
+                "Include Multi-Season Trend Analysis?", value=False
+            )
 
-                # Get Coach Team ID
-                coach_record = teams_df[
-                    teams_df["name"] == st.session_state["coach_team"]
-                ]
-                if not coach_record.empty:
-                    coach_id = coach_record.iloc[0]["id"]
+            if st.button("Analyze Matchup"):
+                if not opponent_record.empty and st.session_state.get("coach_team"):
+                    opp_id = opponent_record.iloc[0]["id"]
 
-                    # 1. Single Season Analysis
-                    analysis = predict_matchup(players_df, coach_id, opp_id, season)
-                    st.text(analysis)
+                    # Get Coach Team ID
+                    coach_record = teams_df[
+                        teams_df["name"] == st.session_state["coach_team"]
+                    ]
+                    if not coach_record.empty:
+                        coach_id = coach_record.iloc[0]["id"]
 
-                    # 2. Multi-Season Analysis (Optional)
-                    if use_multi_season:
-                        from bbcoach.analysis import predict_matchup_multi_season
+                        # 1. Single Season Analysis
+                        analysis = predict_matchup(players_df, coach_id, opp_id, season)
+                        st.text(analysis)
 
-                        trend_analysis = predict_matchup_multi_season(
-                            players_df, coach_id, opp_id
-                        )
-                        st.text(trend_analysis)
-                        analysis += "\n" + trend_analysis
+                        # 2. Multi-Season Analysis (Optional)
+                        if use_multi_season:
+                            from bbcoach.analysis import predict_matchup_multi_season
 
-                    # Button to save
-                    if st.button("Save to Context"):
-                        st.session_state["prediction_context"] = analysis
-                        save_context(analysis)
-                        st.success("Analysis saved to AI Context!")
+                            trend_analysis = predict_matchup_multi_season(
+                                players_df, coach_id, opp_id
+                            )
+                            st.text(trend_analysis)
+                            analysis += "\n" + trend_analysis
+
+                        # Button to save
+                        if st.button("Save to Context"):
+                            st.session_state["prediction_context"] = analysis
+                            save_context(analysis)
+                            st.success("Analysis saved to AI Context!")
+                    else:
+                        st.error("Please select your Coach Team in the sidebar first.")
+
+        with subtab_scout:
+            st.markdown("### 📝 AI Scouting Report Generator")
+            scout_opp_name = st.selectbox(
+                "Target Opponent", teams_df["name"].unique(), key="scout_opp"
+            )
+            scout_season = st.selectbox(
+                "Season Data",
+                sorted(players_df["season"].unique(), reverse=True),
+                key="scout_season",
+            )
+
+            if st.button("Generate Scouting Report", type="primary"):
+                # Check if coach is loaded
+                if "coach" not in st.session_state:
+                    # Logic to load coach if missing (duplicated from Chat, could be refactored)
+                    st.warning(
+                        "Please initialize AI settings in the sidebar first (or just ask a question in Coach's Corner to wake him up)."
+                    )
                 else:
-                    st.error("Please select your Coach Team in the sidebar first.")
+                    with st.spinner(f"Scouting {scout_opp_name} ({scout_season})..."):
+                        # Gather Stats
+                        opp_record = teams_df[teams_df["name"] == scout_opp_name]
+                        if not opp_record.empty:
+                            opp_id = opp_record.iloc[0]["id"]
+                            opp_players = players_df[
+                                (players_df["team_id"] == opp_id)
+                                & (players_df["season"] == scout_season)
+                            ]
+
+                            if not opp_players.empty:
+                                try:
+                                    # Prepare stats summary string
+                                    stats_str = ""
+                                    # Sort by PPG to get key players
+                                    top_players = opp_players.sort_values(
+                                        by="PPG", ascending=False
+                                    ).head(8)
+
+                                    for _, p in top_players.iterrows():
+                                        stats_str += f"- {p['name']}: {p['PPG']} PPG, {p['RPG']} RPG, {p['APG']} APG, {p['3P%']}% 3P\n"
+
+                                    report = (
+                                        st.session_state.coach.generate_scouting_report(
+                                            scout_opp_name, stats_str
+                                        )
+                                    )
+                                    st.markdown(report)
+
+                                    # Save option
+                                    st.download_button(
+                                        label="Download Report",
+                                        data=report,
+                                        file_name=f"scouting_report_{scout_opp_name}.md",
+                                        mime="text/markdown",
+                                    )
+                                except Exception as e:
+                                    st.error(f"Error generating report: {e}")
+                            else:
+                                st.warning("No player data found for this team/season.")
 
     # ------------------------------------------------------------------
     # TAB 4: Coach's Corner
