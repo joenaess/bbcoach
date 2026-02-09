@@ -18,7 +18,9 @@ def save_teams(teams_data: list[dict], filename="teams.parquet"):
     if path.exists():
         existing_df = pd.read_parquet(path)
         # simplistic merge: concat and drop duplicates
-        df = pd.concat([existing_df, df]).drop_duplicates(subset=["id", "season"])
+        df = pd.concat([existing_df, df]).drop_duplicates(
+            subset=["id", "season"], keep="last"
+        )
 
     df.to_parquet(path)
     print(f"Saved {len(df)} teams to {path}")
@@ -31,7 +33,7 @@ def save_players(players_data: list[dict], filename="players.parquet"):
     if path.exists():
         existing_df = pd.read_parquet(path)
         df = pd.concat([existing_df, df]).drop_duplicates(
-            subset=["id", "season", "team_id"]
+            subset=["id", "season", "team_id"], keep="last"
         )
 
     df.to_parquet(path)
@@ -92,4 +94,30 @@ def load_players() -> pd.DataFrame:
                 df["BPG"] = 0.0
 
         return df
+
+
+def save_schedule(schedule_data: list[dict], filename="schedule.parquet"):
+    ensure_data_dir()
+    if not schedule_data:
+        return
+
+    df = pd.DataFrame(schedule_data)
+    path = DATA_DIR / filename
+
+    if path.exists():
+        existing_df = pd.read_parquet(path)
+        # simplistic merge: concat and drop duplicates
+        df = pd.concat([existing_df, df]).drop_duplicates(
+            subset=["team_id", "date", "opponent"],
+            keep="last",  # Drop exact duplicates but keep new
+        )
+
+    df.to_parquet(path)
+    print(f"Saved {len(df)} schedule items to {path}")
+
+
+def load_schedule() -> pd.DataFrame:
+    path = DATA_DIR / "schedule.parquet"
+    if path.exists():
+        return pd.read_parquet(path)
     return pd.DataFrame()

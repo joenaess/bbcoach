@@ -3,7 +3,7 @@ import pandas as pd
 import sys
 import os
 import json
-from datetime import datetime, timedelta
+import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,7 +11,7 @@ load_dotenv()
 # Add src to path
 sys.path.append(os.path.abspath("src"))
 
-from bbcoach.data.storage import load_players, load_teams
+from bbcoach.data.storage import load_players, load_teams, load_schedule
 from bbcoach.ui.components import (
     render_player_card,
     render_stat_metric,
@@ -172,8 +172,10 @@ with st.sidebar:
 
                 # Check freshness (e.g., < 24 hours)
                 try:
-                    last_dt = datetime.strptime(last_update, "%Y-%m-%d %H:%M:%S")
-                    if datetime.now() - last_dt < timedelta(weeks=2):
+                    last_dt = datetime.datetime.strptime(
+                        last_update, "%Y-%m-%d %H:%M:%S"
+                    )
+                    if datetime.datetime.now() - last_dt < datetime.timedelta(weeks=2):
                         is_fresh = True
                 except:
                     pass
@@ -189,14 +191,14 @@ with st.sidebar:
             # Try to get file timestamp, otherwise default to NOW to fix user issue.
             if os.path.exists("data_storage/players.parquet"):
                 ts = os.path.getmtime("data_storage/players.parquet")
-                last_dt = datetime.fromtimestamp(ts)
+                last_dt = datetime.datetime.fromtimestamp(ts)
             else:
-                last_dt = datetime.now()
+                last_dt = datetime.datetime.now()
 
             last_update = last_dt.strftime("%Y-%m-%d %H:%M:%S")
 
             # Check if fresh (2 weeks)
-            if datetime.now() - last_dt < timedelta(weeks=2):
+            if datetime.datetime.now() - last_dt < datetime.timedelta(weeks=2):
                 is_fresh = True
 
             # Create the missing metadata file
@@ -204,7 +206,7 @@ with st.sidebar:
                 json.dump({"last_updated": last_update}, f)
         except:
             # If all else fails but data exists, just say it's updated now
-            last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            last_update = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             is_fresh = True
 
     if is_fresh:
@@ -338,9 +340,72 @@ else:
     st.session_state["coach_team"] = None
 
 # --- TABS ---
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["League Stats", "Player Comparison", "Game Predictor", "Coach's Corner"]
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
+    [
+        "League Stats",
+        "Player Comparison",
+        "Game Predictor",
+        "Coach's Corner",
+        "Schedule",
+    ]
 )
+
+# --- TAB 5: Schedule ---
+with tab5:
+    st.title("📅 Game Schedule")
+
+    schedule_df = load_schedule()
+
+    if schedule_df.empty:
+        st.info("No schedule data found. Please fetch stats to load the schedule.")
+    else:
+        # Filter by Team
+        teams_list = sorted(schedule_df["team_id"].unique())
+
+        # Try to default to coach's team if set
+        default_team_index = 0
+        if "coach" in st.session_state and st.session_state["coach"].team_name:
+            # This might be tricky as team_name is name not ID, but let's try to match or just default to 0
+            pass
+
+        selected_team_id = st.selectbox(
+            "Select Team", teams_list, format_func=lambda x: f"Team {x}"
+        )
+        # Ideally we want team names here. We can merge with teams_df if available.
+
+        # IMPROVEMENT: Load teams to get names
+        teams_df = load_teams()
+        if not teams_df.empty:
+            # Create a mapping
+            id_to_name = dict(zip(teams_df["id"], teams_df["name"]))
+            team_name = id_to_name.get(selected_team_id, selected_team_id)
+            st.subheader(f"Schedule for {team_name}")
+        else:
+            st.subheader(f"Schedule for Team {selected_team_id}")
+
+        team_schedule = schedule_df[schedule_df["team_id"] == selected_team_id].copy()
+
+        # Sort by date
+        # Date format might be string, let's try to convert for sorting
+        try:
+            team_schedule["date_dt"] = pd.to_datetime(
+                team_schedule["date"], errors="coerce"
+            )
+            team_schedule = team_schedule.sort_values("date_dt")
+        except:
+            pass
+
+        # Display
+        st.dataframe(
+            team_schedule[["date", "opponent", "result"]],
+            hide_index=True,
+            width="stretch",
+            column_config={
+                "date": "Date",
+                "opponent": "Opponent",
+                "result": "Result/Time",
+            },
+        )
 
 # ------------------------------------------------------------------
 # TAB 1: League Stats

@@ -7,7 +7,7 @@ import sys
 import os
 
 sys.path.append(os.path.abspath("src"))
-from bbcoach.data.storage import save_teams, save_players
+from bbcoach.data.storage import save_teams, save_players, save_schedule
 import re
 
 # Base URL
@@ -124,6 +124,62 @@ class BasketballScraper:
         finally:
             await page.close()
 
+    async def scrape_team_schedule(self, team_url: str, year: int) -> List[Dict]:
+        """
+        Scrapes a team's schedule for a specific season.
+        url format: .../team/ID/SLUG/schedule/YEAR
+        """
+        target_url = f"{team_url}/schedule/{year}"
+        page = await self._get_page()
+
+        try:
+            print(f"Scraping Schedule {target_url}")
+            await page.goto(target_url)
+            await self.bypass_cloudflare(page)
+
+            # Extract Schedule Table
+            # Look for table with Date, Opponent, Score
+            games = await page.eval_on_selector_all(
+                "table tbody tr",
+                """rows => rows.map(row => {
+                const cells = Array.from(row.querySelectorAll('td'));
+                if (cells.length < 4) return null;
+                
+                // Try to identify columns loosely
+                // Date is usually first
+                // Opponent has a link usually
+                // Score is usually centered
+                
+                const date = cells[0].innerText.trim();
+                const opponentLink = row.querySelector('a[href*="/team/"]');
+                const opponent = opponentLink ? opponentLink.innerText.trim() : cells[2].innerText.trim();
+                const result = cells[3] ? cells[3].innerText.trim() : "";
+                
+                return {
+                    date: date,
+                    opponent: opponent,
+                    result: result
+                };
+            })""",
+            )
+
+            clean_games = []
+            team_id = team_url.split("/team/")[1].split("/")[0]
+
+            for g in games:
+                if g and g["date"] and g["opponent"]:
+                    g["team_id"] = team_id
+                    g["season"] = year
+                    clean_games.append(g)
+
+            return clean_games
+
+        except Exception as e:
+            print(f"Error scraping schedule {target_url}: {e}")
+            return []
+        finally:
+            await page.close()
+
     async def scrape_all_teams(self, teams: List[Dict], years: List[int]):
         all_players = []
         all_teams_data = []
@@ -159,6 +215,14 @@ class BasketballScraper:
                     # Save incrementally
                     # Just passing the new batch
                     save_players(data["players"], filename="players.parquet")
+
+                # Scrape Schedule (Only need to do this once per season really, but doing it here is fine)
+                # We should probably only do it for the LATEST season to save time?
+                # or if year == max(years)?
+                # Let's do it for all requested years to be safe.
+                schedule_data = await self.scrape_team_schedule(base_team_url, year)
+                if schedule_data:
+                    save_schedule(schedule_data, filename="schedule.parquet")
 
                 # Politeness sleep
                 await asyncio.sleep(2)
