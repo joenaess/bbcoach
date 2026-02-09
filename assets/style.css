@@ -1,0 +1,151 @@
+/* assets/style.css */
+
+/* --- ROOT VARIABLES --- */
+:root {
+    --primary-color: #FF5722; /* Basketball Orange */
+    --primary-hover: #E64A19;
+    --background-dark: #0E1117;
+    --background-secondary: #262730;
+    --text-primary: #FAFAFA;
+    --text-secondary: #BDC1C6;
+    --accent-blue: #29B5E8;
+    --card-bg: #1E1E1E;
+    --border-radius: 12px;
+}
+
+/* --- GLOBAL STYLES --- */
+.stApp {
+    background-color: var(--background-dark);
+    font-family: 'Inter', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary) !important;
+}
+
+h1 {
+    color: var(--primary-color) !important;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 10px;
+    display: inline-block;
+}
+
+/* --- SIDEBAR --- */
+section[data-testid="stSidebar"] {
+    background-color: var(--background-secondary);
+    border-right: 1px solid #333;
+}
+
+section[data-testid="stSidebar"] h1, 
+section[data-testid="stSidebar"] h2, 
+section[data-testid="stSidebar"] h3 {
+    color: var(--primary-color) !important;
+}
+
+/* --- BUTTONS --- */
+.stButton > button {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 20px;
+    font-weight: 600;
+    border: none;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.stButton > button:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+/* Secondary Button (Outline) */
+.stButton > button[kind="secondary"] {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* --- METRIC CARDS --- */
+div[data-testid="stMetricValue"] {
+    font-size: 2rem !important;
+    color: var(--primary-color) !important;
+}
+
+div[data-testid="stMetricLabel"] {
+    font-size: 1rem !important;
+    color: var(--text-secondary) !important;
+}
+
+/* --- DATAFRAMES --- */
+[data-testid="stDataFrame"] {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid #333;
+    padding: 10px;
+}
+
+/* --- TABS --- */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 10px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background-color: transparent;
+    border-radius: 4px;
+    color: var(--text-secondary);
+    padding-bottom: 0px;
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--primary-color) !important;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+/* --- CUSTOM PLAYER CARD COMPONENT --- */
+.player-card {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s;
+}
+
+.player-card:hover {
+    transform: scale(1.02);
+    border-color: var(--primary-color);
+}
+
+.player-info {
+    margin-left: 15px;
+}
+
+.player-name {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.player-team {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.stat-badge {
+    background-color: #333;
+    color: var(--primary-color);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    margin-left: auto;
+}

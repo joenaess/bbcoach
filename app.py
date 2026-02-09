@@ -10,6 +10,7 @@ load_dotenv()
 sys.path.append(os.path.abspath("src"))
 
 from bbcoach.data.storage import load_players, load_teams
+from bbcoach.ui.components import render_player_card, render_stat_metric
 
 # Lazy load AI model to avoid long startup time if not needed immediately
 # from bbcoach.ai.coach import BasketballCoach
@@ -19,64 +20,20 @@ st.set_page_config(
     page_title="Swedish Basketball League Coach", layout="wide", page_icon="🏀"
 )
 
+
 # --- THEME CSS ---
-st.markdown(
-    """
-    <style>
-    /* Basketball Theme Colors */
-    :root {
-        --primary-color: #FF5722; /* Basketball Orange */
-        --background-color: #FAFAFA;
-        --secondary-background-color: #F0F2F6;
-        --text-color: #333333;
-        --font: "sans-serif";
-    }
-    
-    .stAppHeader {
-        background-color: #1E1E1E !important;
-        color: white !important;
-    }
-    
-    /* Custom Title */
-    h1 {
-        color: #E65100;
-        font-family: 'Helvetica Neue', sans-serif;
-        font-weight: 800;
-        letter-spacing: -1px;
-    }
-    
-    h2, h3 {
-        color: #BF360C;
-    }
-    
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background-color: #263238;
-        color: white;
-    }
-    
-    /* Buttons */
-    .stButton > button {
-        background-color: #E65100;
-        color: white;
-        border-radius: 20px;
-        font-weight: bold;
-        border: none;
-    }
-    .stButton > button:hover {
-        background-color: #FF6D00;
-        color: white;
-    }
-    
-    /* Dataframes */
-    [data-testid="stDataFrame"] {
-        border: 2px solid #FFCC80;
-        border-radius: 5px;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+# --- THEME CSS ---
+def load_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+css_path = os.path.join(os.path.dirname(__file__), "assets/style.css")
+if os.path.exists(css_path):
+    load_css(css_path)
+else:
+    st.warning("CSS file not found. Using default styles.")
+
 
 st.title("🏀 Swedish Basketball League AI Coach")
 
@@ -303,7 +260,9 @@ def clear_context():
 
 # Sidebar
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["League Stats", "Game Predictor", "Coach's Corner"])
+page = st.sidebar.radio(
+    "Go to", ["League Stats", "Player Comparison", "Game Predictor", "Coach's Corner"]
+)
 
 # --- CONTEXT RESET ---
 with st.sidebar:
@@ -350,14 +309,13 @@ else:
     st.session_state["coach_team"] = None
 
 # --- TABS ---
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["League Stats", "Player Comparison", "Game Predictor", "Coach's Corner"]
-)
+# --- MAIN CONTENT ---
+# Tabs replaced by Sidebar Navigation
 
 # ------------------------------------------------------------------
 # TAB 1: League Stats
 # ------------------------------------------------------------------
-with tab1:
+if page == "League Stats":
     if not players_df.empty:
         # Move season selection UP so selected_season is available
         selected_season = st.selectbox(
@@ -374,40 +332,30 @@ with tab1:
             if not season_players.empty:
                 top_scorers = season_players.sort_values(
                     by="PPG", ascending=False
-                ).head(10)
+                ).head(5)
                 # Create mapping for display
                 team_id_map = dict(zip(teams_df["id"], teams_df["name"]))
 
-                # Add Team Name column for display
-                top_scorers["team"] = (
-                    top_scorers["team_id"]
-                    .astype(str)
-                    .map(team_id_map)
-                    .fillna(top_scorers["team_id"])
-                )
-
-                st.dataframe(
-                    top_scorers[["name", "team", "PPG", "RPG", "APG", "3P%"]],
-                    hide_index=True,
-                )
+                for rank, (_, row) in enumerate(top_scorers.iterrows(), 1):
+                    player_data = row.to_dict()
+                    player_data["team"] = team_id_map.get(
+                        str(row["team_id"]), str(row["team_id"])
+                    )
+                    render_player_card(player_data, rank=rank)
 
         with c2:
             st.subheader("Top Rebounders")
             if not season_players.empty:
-                top_reb = season_players.sort_values(by="RPG", ascending=False).head(10)
-                # Map team for rebounders too
-                if "team" not in top_reb.columns:
-                    team_id_map = dict(zip(teams_df["id"], teams_df["name"]))
-                    top_reb["team"] = (
-                        top_reb["team_id"]
-                        .astype(str)
-                        .map(team_id_map)
-                        .fillna(top_reb["team_id"])
-                    )
+                top_reb = season_players.sort_values(by="RPG", ascending=False).head(5)
 
-                st.dataframe(
-                    top_reb[["name", "team", "RPG", "PPG", "APG"]], hide_index=True
-                )
+                team_id_map = dict(zip(teams_df["id"], teams_df["name"]))
+
+                for rank, (_, row) in enumerate(top_reb.iterrows(), 1):
+                    player_data = row.to_dict()
+                    player_data["team"] = team_id_map.get(
+                        str(row["team_id"]), str(row["team_id"])
+                    )
+                    render_player_card(player_data, rank=rank)
 
         # --- FULL STATS TABLE ---
         st.subheader("Advanced League Data")
@@ -468,321 +416,319 @@ with tab1:
     # ------------------------------------------------------------------
     # TAB 2: Player Comparison (Analytics)
     # ------------------------------------------------------------------
-    with tab2:
-        st.header("🔬 Player Comparison")
+if page == "Player Comparison":
+    st.header("🔬 Player Comparison")
 
-        if not players_df.empty:
-            from bbcoach.data.analytics import create_radar_chart
+    if not players_df.empty:
+        from bbcoach.data.analytics import create_radar_chart
 
-            # Select Players
-            all_player_names = players_df["name"].sort_values().unique().tolist()
+        # Select Players
+        all_player_names = players_df["name"].sort_values().unique().tolist()
 
-            col1, col2 = st.columns(2)
-            with col1:
-                p1_name = st.selectbox("Select Player 1", all_player_names, index=0)
-            with col2:
-                # Try to pick a different default
-                default_idx_2 = 1 if len(all_player_names) > 1 else 0
-                p2_name = st.selectbox(
-                    "Select Player 2", all_player_names, index=default_idx_2
-                )
-
-            if p1_name and p2_name:
-                # Get stats
-                p1_stats = players_df[players_df["name"] == p1_name].iloc[0]
-                p2_stats = players_df[players_df["name"] == p2_name].iloc[0]
-
-                # Prepare data for chart
-                comparison_df = players_df[
-                    players_df["name"].isin([p1_name, p2_name])
-                ].copy()
-
-                # Render Chart
-                fig = create_radar_chart(comparison_df)
-                if fig:
-                    # use_container_width=True is deprecated
-                    st.plotly_chart(fig)
-                else:
-                    st.warning("Not enough data to generate chart.")
-
-                # Data Table
-                st.subheader("Head-to-Head Stats")
-
-                # Map team name for display
-                team_id_map = dict(zip(teams_df["id"], teams_df["name"]))
-                comparison_df["team"] = (
-                    comparison_df["team_id"]
-                    .astype(str)
-                    .map(team_id_map)
-                    .fillna(comparison_df["team_id"])
-                )
-
-                st.dataframe(
-                    comparison_df[["name", "team", "PPG", "RPG", "APG", "3P%"]],
-                    hide_index=True,
-                )
-
-    # ------------------------------------------------------------------
-    # TAB 3: Game Predictor
-    # ------------------------------------------------------------------
-    with tab3:
-        st.header("Matchup & Scouting")
-
-        # Sub-tabs for Predictor vs Scouting Report
-        subtab_pred, subtab_scout = st.tabs(["🔮 Game Predictor", "📋 Scouting Report"])
-
-        with subtab_pred:
-            # Team Selection for Opponent
-            opponent_name = st.selectbox(
-                "Select Opponent", teams_df["name"].unique(), key="pred_opp"
-            )
-            opponent_record = teams_df[teams_df["name"] == opponent_name]
-
-            season = st.selectbox(
-                "Season",
-                sorted(players_df["season"].unique(), reverse=True),
-                key="pred_season",
-            )
-            use_multi_season = st.checkbox(
-                "Include Multi-Season Trend Analysis?", value=False
+        col1, col2 = st.columns(2)
+        with col1:
+            p1_name = st.selectbox("Select Player 1", all_player_names, index=0)
+        with col2:
+            # Try to pick a different default
+            default_idx_2 = 1 if len(all_player_names) > 1 else 0
+            p2_name = st.selectbox(
+                "Select Player 2", all_player_names, index=default_idx_2
             )
 
-            if st.button("Analyze Matchup"):
-                if not opponent_record.empty and st.session_state.get("coach_team"):
-                    opp_id = opponent_record.iloc[0]["id"]
+        if p1_name and p2_name:
+            # Get stats
+            p1_stats = players_df[players_df["name"] == p1_name].iloc[0]
+            p2_stats = players_df[players_df["name"] == p2_name].iloc[0]
 
-                    # Get Coach Team ID
-                    coach_record = teams_df[
-                        teams_df["name"] == st.session_state["coach_team"]
-                    ]
-                    if not coach_record.empty:
-                        coach_id = coach_record.iloc[0]["id"]
+            # Prepare data for chart
+            comparison_df = players_df[
+                players_df["name"].isin([p1_name, p2_name])
+            ].copy()
 
-                        # 1. Single Season Analysis
-                        analysis = predict_matchup(players_df, coach_id, opp_id, season)
-                        st.text(analysis)
+            # Render Chart
+            fig = create_radar_chart(comparison_df)
+            if fig:
+                # use_container_width=True is deprecated
+                st.plotly_chart(fig)
+            else:
+                st.warning("Not enough data to generate chart.")
 
-                        # 2. Multi-Season Analysis (Optional)
-                        if use_multi_season:
-                            from bbcoach.analysis import predict_matchup_multi_season
+            # Data Table
+            st.subheader("Head-to-Head Stats")
 
-                            trend_analysis = predict_matchup_multi_season(
-                                players_df, coach_id, opp_id
-                            )
-                            st.text(trend_analysis)
-                            analysis += "\n" + trend_analysis
-
-                        # Button to save
-                        if st.button("Save to Context"):
-                            st.session_state["prediction_context"] = analysis
-                            save_context(analysis)
-                            st.success("Analysis saved to AI Context!")
-                    else:
-                        st.error("Please select your Coach Team in the sidebar first.")
-
-        with subtab_scout:
-            st.markdown("### 📝 AI Scouting Report Generator")
-            scout_opp_name = st.selectbox(
-                "Target Opponent", teams_df["name"].unique(), key="scout_opp"
-            )
-            scout_season = st.selectbox(
-                "Season Data",
-                sorted(players_df["season"].unique(), reverse=True),
-                key="scout_season",
+            # Map team name for display
+            team_id_map = dict(zip(teams_df["id"], teams_df["name"]))
+            comparison_df["team"] = (
+                comparison_df["team_id"]
+                .astype(str)
+                .map(team_id_map)
+                .fillna(comparison_df["team_id"])
             )
 
-            if st.button("Generate Scouting Report", type="primary"):
-                # Check if coach is loaded
-                if "coach" not in st.session_state:
-                    # Logic to load coach if missing (duplicated from Chat, could be refactored)
-                    st.warning(
-                        "Please initialize AI settings in the sidebar first (or just ask a question in Coach's Corner to wake him up)."
-                    )
-                else:
-                    with st.spinner(f"Scouting {scout_opp_name} ({scout_season})..."):
-                        # Gather Stats
-                        opp_record = teams_df[teams_df["name"] == scout_opp_name]
-                        if not opp_record.empty:
-                            opp_id = opp_record.iloc[0]["id"]
-                            opp_players = players_df[
-                                (players_df["team_id"] == opp_id)
-                                & (players_df["season"] == scout_season)
-                            ]
+            st.dataframe(
+                comparison_df[["name", "team", "PPG", "RPG", "APG", "3P%"]],
+                hide_index=True,
+            )
 
-                            if not opp_players.empty:
-                                try:
-                                    # Prepare stats summary string
-                                    stats_str = ""
-                                    # Sort by PPG to get key players
-                                    top_players = opp_players.sort_values(
-                                        by="PPG", ascending=False
-                                    ).head(8)
+# ------------------------------------------------------------------
+# TAB 3: Game Predictor
+# ------------------------------------------------------------------
+if page == "Game Predictor":
+    st.header("Matchup & Scouting")
 
-                                    for _, p in top_players.iterrows():
-                                        stats_str += f"- {p['name']}: {p['PPG']} PPG, {p['RPG']} RPG, {p['APG']} APG, {p['3P%']}% 3P\n"
+    # Sub-tabs for Predictor vs Scouting Report
+    subtab_pred, subtab_scout = st.tabs(["🔮 Game Predictor", "📋 Scouting Report"])
 
-                                    report = (
-                                        st.session_state.coach.generate_scouting_report(
-                                            scout_opp_name, stats_str
-                                        )
-                                    )
-                                    st.markdown(report)
+    with subtab_pred:
+        # Team Selection for Opponent
+        opponent_name = st.selectbox(
+            "Select Opponent", teams_df["name"].unique(), key="pred_opp"
+        )
+        opponent_record = teams_df[teams_df["name"] == opponent_name]
 
-                                    # Save option
-                                    st.download_button(
-                                        label="Download Report",
-                                        data=report,
-                                        file_name=f"scouting_report_{scout_opp_name}.md",
-                                        mime="text/markdown",
-                                    )
-                                except Exception as e:
-                                    st.error(f"Error generating report: {e}")
-                            else:
-                                st.warning("No player data found for this team/season.")
-
-    # ------------------------------------------------------------------
-    # TAB 4: Coach's Corner
-    # ------------------------------------------------------------------
-    with tab4:
-        st.header("Coach's Corner 🧠")
-        coach_team = st.session_state.get("coach_team", "a team")
-        st.write(
-            f"As the coach of **{coach_team}**, ask about your players or opponents."
+        season = st.selectbox(
+            "Season",
+            sorted(players_df["season"].unique(), reverse=True),
+            key="pred_season",
+        )
+        use_multi_season = st.checkbox(
+            "Include Multi-Season Trend Analysis?", value=False
         )
 
-        # Show current context
-        current_context = load_context()
-        with st.expander("Current Context (tmp_prompt.txt)"):
-            st.code(current_context)
+        if st.button("Analyze Matchup"):
+            if not opponent_record.empty and st.session_state.get("coach_team"):
+                opp_id = opponent_record.iloc[0]["id"]
 
-        if "messages" not in st.session_state:
-            st.session_state.messages = []
+                # Get Coach Team ID
+                coach_record = teams_df[
+                    teams_df["name"] == st.session_state["coach_team"]
+                ]
+                if not coach_record.empty:
+                    coach_id = coach_record.iloc[0]["id"]
 
-        for message in st.session_state.messages:
-            with st.chat_message(message["role"]):
-                st.markdown(message["content"])
+                    # 1. Single Season Analysis
+                    analysis = predict_matchup(players_df, coach_id, opp_id, season)
+                    st.text(analysis)
 
-        if prompt := st.chat_input("Ask Coach..."):
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
+                    # 2. Multi-Season Analysis (Optional)
+                    if use_multi_season:
+                        from bbcoach.analysis import predict_matchup_multi_season
 
-            with st.chat_message("assistant"):
-                message_placeholder = st.empty()
-                message_placeholder.markdown("Thinking...")
-
-                # Load coach only when needed
-                if "coach" not in st.session_state:
-                    with st.spinner("Loading AI Coach..."):
-                        import importlib
-                        import bbcoach.ai.coach
-
-                        importlib.reload(bbcoach.ai.coach)
-                        from bbcoach.ai.coach import BasketballCoach
-
-                        # Get config from session
-                        p_type = st.session_state.get("ai_provider", "local")
-                        p_key = st.session_state.get("ai_key", None)
-                        p_model = st.session_state.get("ai_model", None)
-
-                        st.session_state.coach = BasketballCoach(
-                            provider=p_type, api_key=p_key, model_name=p_model
+                        trend_analysis = predict_matchup_multi_season(
+                            players_df, coach_id, opp_id
                         )
+                        st.text(trend_analysis)
+                        analysis += "\n" + trend_analysis
 
-                # Prepare context
-                coach_team = st.session_state.get("coach_team", "Unknown Team")
+                    # Button to save
+                    if st.button("Save to Context"):
+                        st.session_state["prediction_context"] = analysis
+                        save_context(analysis)
+                        st.success("Analysis saved to AI Context!")
+                else:
+                    st.error("Please select your Coach Team in the sidebar first.")
 
-                # --- SYSTEM PROMPT ---
-                system_prompt = (
-                    f"You are the deeply analytical **Assistant Coach** of {coach_team} in the Swedish Basketball League.\\n"
-                    f"Your job is to support the Head Coach with data-driven tactical advice, practice recommendations, and playbook adjustments.\\n\\n"
-                    f"**YOUR CAPABILITIES:**\\n"
-                    f"1. **Game Tactics**: Suggest offensive/defensive schemes based on matchups (e.g., 'Switch all screens,' 'Zone defense against their poor shooters').\\n"
-                    f"2. **Practice Focus**: Recommend specific drills based on recent performance or upcoming opponent weaknesses (e.g., 'Close-out drills' if opponent shoots 3s well).\\n"
-                    f"3. **Playbook Setups**: Propose specific plays (ATO, P&R coverage) to exploit gaps in the opponent's defense.\\n\\n"
-                    f"**GUIDELINES:**\\n"
-                    f"- Use the **FULL ROSTER STATS** provided to find hidden gems or specific mismatches (not just starters).\\n"
-                    f"- Be specific. Don't say 'play better defense,' say 'We need to ICE the pick-and-roll against {opponent_name if 'opponent_name' in locals() else 'them'} because their guards are poor shooters.'\\n"
-                    f"- Refer to 'Our Starters' and 'Their Starters' explicitly when analyzing rotations."
+    with subtab_scout:
+        st.markdown("### 📝 AI Scouting Report Generator")
+        scout_opp_name = st.selectbox(
+            "Target Opponent", teams_df["name"].unique(), key="scout_opp"
+        )
+        scout_season = st.selectbox(
+            "Season Data",
+            sorted(players_df["season"].unique(), reverse=True),
+            key="scout_season",
+        )
+
+        if st.button("Generate Scouting Report", type="primary"):
+            # Check if coach is loaded
+            if "coach" not in st.session_state:
+                # Logic to load coach if missing (duplicated from Chat, could be refactored)
+                st.warning(
+                    "Please initialize AI settings in the sidebar first (or just ask a question in Coach's Corner to wake him up)."
                 )
-
-                context = f"{system_prompt}\n\n=== CONTEXT DATA ===\n"
-
-                # 1. Automatic Team & Opponent Context (if analysis exists or manually selected)
-                # If the user has run an analysis, it's in the file context.
-                # But let's also inject the roster summary of the CURRENT coach team automatically.
-
-                if not players_df.empty and st.session_state.get("coach_team"):
-                    team_record = teams_df[
-                        teams_df["name"] == st.session_state["coach_team"]
-                    ]
-                    if not team_record.empty:
-                        tid = team_record.iloc[0]["id"]
-                        latest_season = players_df["season"].max()
-                        # Get top 8 rotation for context to save tokens
-                        team_players = players_df[
-                            (players_df["team_id"] == tid)
-                            & (players_df["season"] == latest_season)
+            else:
+                with st.spinner(f"Scouting {scout_opp_name} ({scout_season})..."):
+                    # Gather Stats
+                    opp_record = teams_df[teams_df["name"] == scout_opp_name]
+                    if not opp_record.empty:
+                        opp_id = opp_record.iloc[0]["id"]
+                        opp_players = players_df[
+                            (players_df["team_id"] == opp_id)
+                            & (players_df["season"] == scout_season)
                         ]
 
-                        if not team_players.empty:
-                            # Parse stats for cleaner context
-                            roster_summary = []
-                            for _, p in team_players.iterrows():
-                                try:
-                                    raw = p["raw_stats"]
-                                    roster_summary.append(
-                                        f"{p['name']}: {raw[3]} PPG, {raw[4]} RPG, {raw[5]} APG, {raw[10]} 3P%"
+                        if not opp_players.empty:
+                            try:
+                                # Prepare stats summary string
+                                stats_str = ""
+                                # Sort by PPG to get key players
+                                top_players = opp_players.sort_values(
+                                    by="PPG", ascending=False
+                                ).head(8)
+
+                                for _, p in top_players.iterrows():
+                                    stats_str += f"- {p['name']}: {p['PPG']} PPG, {p['RPG']} RPG, {p['APG']} APG, {p['3P%']}% 3P\n"
+
+                                report = (
+                                    st.session_state.coach.generate_scouting_report(
+                                        scout_opp_name, stats_str
                                     )
-                                except:
-                                    continue
+                                )
+                                st.markdown(report)
 
-                            # Top 10 by PPG (approx)
-                            context += (
-                                f"\nYOUR ROSTER ({latest_season}):\n"
-                                + "\n".join(roster_summary[:10])
-                                + "\n"
-                            )
+                                # Save option
+                                st.download_button(
+                                    label="Download Report",
+                                    data=report,
+                                    file_name=f"scouting_report_{scout_opp_name}.md",
+                                    mime="text/markdown",
+                                )
+                            except Exception as e:
+                                st.error(f"Error generating report: {e}")
+                        else:
+                            st.warning("No player data found for this team/season.")
 
-                # 2. Load file context (Matchup Analysis)
-                file_context = load_context()
-                if file_context:
-                    context += f"\n=== MATCHUP ANALYSIS ===\n{file_context}\n"
+# ------------------------------------------------------------------
+# TAB 4: Coach's Corner
+# ------------------------------------------------------------------
+if page == "Coach's Corner":
+    st.header("Coach's Corner 🧠")
+    coach_team = st.session_state.get("coach_team", "a team")
+    st.write(f"As the coach of **{coach_team}**, ask about your players or opponents.")
 
-                # 3. Mentioned Players (Specific Queries)
-                found_mentions = []
-                if not players_df.empty:
-                    prompt_lower = prompt.lower()
-                    unique_players = players_df[
-                        players_df["season"] == players_df["season"].max()
+    # Show current context
+    current_context = load_context()
+    with st.expander("Current Context (tmp_prompt.txt)"):
+        st.code(current_context)
+
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    if prompt := st.chat_input("Ask Coach..."):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            message_placeholder.markdown("Thinking...")
+
+            # Load coach only when needed
+            if "coach" not in st.session_state:
+                with st.spinner("Loading AI Coach..."):
+                    import importlib
+                    import bbcoach.ai.coach
+
+                    importlib.reload(bbcoach.ai.coach)
+                    from bbcoach.ai.coach import BasketballCoach
+
+                    # Get config from session
+                    p_type = st.session_state.get("ai_provider", "local")
+                    p_key = st.session_state.get("ai_key", None)
+                    p_model = st.session_state.get("ai_model", None)
+
+                    st.session_state.coach = BasketballCoach(
+                        provider=p_type, api_key=p_key, model_name=p_model
+                    )
+
+            # Prepare context
+            coach_team = st.session_state.get("coach_team", "Unknown Team")
+
+            # --- SYSTEM PROMPT ---
+            system_prompt = (
+                f"You are the deeply analytical **Assistant Coach** of {coach_team} in the Swedish Basketball League.\\n"
+                f"Your job is to support the Head Coach with data-driven tactical advice, practice recommendations, and playbook adjustments.\\n\\n"
+                f"**YOUR CAPABILITIES:**\\n"
+                f"1. **Game Tactics**: Suggest offensive/defensive schemes based on matchups (e.g., 'Switch all screens,' 'Zone defense against their poor shooters').\\n"
+                f"2. **Practice Focus**: Recommend specific drills based on recent performance or upcoming opponent weaknesses (e.g., 'Close-out drills' if opponent shoots 3s well).\\n"
+                f"3. **Playbook Setups**: Propose specific plays (ATO, P&R coverage) to exploit gaps in the opponent's defense.\\n\\n"
+                f"**GUIDELINES:**\\n"
+                f"- Use the **FULL ROSTER STATS** provided to find hidden gems or specific mismatches (not just starters).\\n"
+                f"- Be specific. Don't say 'play better defense,' say 'We need to ICE the pick-and-roll against {opponent_name if 'opponent_name' in locals() else 'them'} because their guards are poor shooters.'\\n"
+                f"- Refer to 'Our Starters' and 'Their Starters' explicitly when analyzing rotations."
+            )
+
+            context = f"{system_prompt}\n\n=== CONTEXT DATA ===\n"
+
+            # 1. Automatic Team & Opponent Context (if analysis exists or manually selected)
+            # If the user has run an analysis, it's in the file context.
+            # But let's also inject the roster summary of the CURRENT coach team automatically.
+
+            if not players_df.empty and st.session_state.get("coach_team"):
+                team_record = teams_df[
+                    teams_df["name"] == st.session_state["coach_team"]
+                ]
+                if not team_record.empty:
+                    tid = team_record.iloc[0]["id"]
+                    latest_season = players_df["season"].max()
+                    # Get top 8 rotation for context to save tokens
+                    team_players = players_df[
+                        (players_df["team_id"] == tid)
+                        & (players_df["season"] == latest_season)
                     ]
 
-                    for idx, row in unique_players.iterrows():
-                        name = str(row["name"])
-                        if name.lower() in prompt_lower:
-                            found_mentions.append(row)
+                    if not team_players.empty:
+                        # Parse stats for cleaner context
+                        roster_summary = []
+                        for _, p in team_players.iterrows():
+                            try:
+                                raw = p["raw_stats"]
+                                roster_summary.append(
+                                    f"{p['name']}: {raw[3]} PPG, {raw[4]} RPG, {raw[5]} APG, {raw[10]} 3P%"
+                                )
+                            except:
+                                continue
 
-                if found_mentions:
-                    context += "\n=== SPECIFIC PLAYERS ===\n"
-                    for p in found_mentions:
-                        try:
-                            raw = p["raw_stats"]
-                            # Detailed stats for mentioned players
-                            context += f"- {p['name']} ({p['season']}): {raw[3]} PPG, {raw[4]} RPG, {raw[5]} APG, {raw[9]} FG%, {raw[10]} 3P%, {raw[18]} TO\n"
-                        except:
-                            pass
+                        # Top 10 by PPG (approx)
+                        context += (
+                            f"\nYOUR ROSTER ({latest_season}):\n"
+                            + "\n".join(roster_summary[:10])
+                            + "\n"
+                        )
 
-                response = st.session_state.coach.ask(context, prompt)
+            # 2. Load file context (Matchup Analysis)
+            file_context = load_context()
+            if file_context:
+                context += f"\n=== MATCHUP ANALYSIS ===\n{file_context}\n"
 
-                # Show which model was used
-                used_model = st.session_state.coach.get_model_info()
-                final_response = f"**{used_model}**\n\n{response}"
+            # 3. Mentioned Players (Specific Queries)
+            found_mentions = []
+            if not players_df.empty:
+                prompt_lower = prompt.lower()
+                unique_players = players_df[
+                    players_df["season"] == players_df["season"].max()
+                ]
 
-                message_placeholder.markdown(final_response)
+                for idx, row in unique_players.iterrows():
+                    name = str(row["name"])
+                    if name.lower() in prompt_lower:
+                        found_mentions.append(row)
 
-            st.session_state.messages.append(
-                {"role": "assistant", "content": final_response}
-            )
+            if found_mentions:
+                context += "\n=== SPECIFIC PLAYERS ===\n"
+                for p in found_mentions:
+                    try:
+                        raw = p["raw_stats"]
+                        # Detailed stats for mentioned players
+                        context += f"- {p['name']} ({p['season']}): {raw[3]} PPG, {raw[4]} RPG, {raw[5]} APG, {raw[9]} FG%, {raw[10]} 3P%, {raw[18]} TO\n"
+                    except:
+                        pass
+
+            response = st.session_state.coach.ask(context, prompt)
+
+            # Show which model was used
+            used_model = st.session_state.coach.get_model_info()
+            final_response = f"**{used_model}**\n\n{response}"
+
+            message_placeholder.markdown(final_response)
+
+        st.session_state.messages.append(
+            {"role": "assistant", "content": final_response}
+        )
 
 
 # Sidebar Analysis Tools (Updated to write to file)
