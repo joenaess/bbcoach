@@ -171,57 +171,59 @@ class BasketballScraper:
         save_teams(all_teams_data, filename="teams.parquet")
 
 
+async def run_scraper():
+    print("Starting Scraper...")
+    scraper = BasketballScraper()
+    await scraper.start()
+
+    # Load teams from json
+    if not os.path.exists("all_teams.json"):
+        print(
+            "all_teams.json not found. Creating dummy list or running inspector first?"
+        )
+        # This assumes all_teams.json exists from previous steps.
+        # If not, we might need to run inspect_page first.
+        # For now, let's assume it exists.
+        return
+
+    with open("all_teams.json", "r") as f:
+        all_teams = json.load(f)
+
+    test_teams = []
+    seen_urls = set()
+    for t in all_teams:
+        href = t.get("href")
+        if (
+            not href
+            or "/schedule" in href
+            or "/all-time-roster" in href
+            or "/team-records" in href
+        ):
+            continue
+
+        base_url = re.sub(r"/\d{4}$", "", href)
+
+        if base_url not in seen_urls:
+            seen_urls.add(base_url)
+            test_teams.append(t)
+
+    print(f"Found {len(test_teams)} unique teams.")
+
+    # PROD RUN: last 5 seasons
+    years = [2025, 2024, 2023, 2022, 2021]
+
+    await scraper.scrape_all_teams(test_teams, years)
+    await scraper.stop()
+
+    # Save Metadata with Timestamp
+    from datetime import datetime
+
+    metadata = {"last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+    os.makedirs("data_storage", exist_ok=True)
+    with open("data_storage/metadata.json", "w") as f:
+        json.dump(metadata, f)
+    print("Scraping Complete. Metadata Saved.")
+
+
 if __name__ == "__main__":
-    # Example usage
-    async def main():
-        scraper = BasketballScraper()
-        await scraper.start()
-
-        # Load teams from json
-        with open("all_teams.json", "r") as f:
-            all_teams = json.load(f)
-
-        # Filter for "Basketligan" teams if Mixed?
-        # The file `all_teams.json` came from the league page so should be correct.
-        # But inspect_page output showed 55 teams? That seems like a lot for Swedish league (usually ~10).
-        # Maybe it includes 2nd division or historical teams provided by "teams" page.
-        # We will take the first 5 for testing.
-
-        test_teams = []
-        seen_urls = set()
-        for t in all_teams:
-            href = t.get("href")
-            # Filter for base team URLs (no /schedule, /records, etc.)
-            if (
-                not href
-                or "/schedule" in href
-                or "/all-time-roster" in href
-                or "/team-records" in href
-            ):
-                continue
-
-            # Normalize URL (remove trailing year)
-            base_url = re.sub(r"/\d{4}$", "", href)
-
-            if base_url not in seen_urls:
-                seen_urls.add(base_url)
-                test_teams.append(t)
-
-        print(f"Found {len(test_teams)} unique teams.")
-
-        # PROD RUN: last 5 seasons
-        # Current is 2025? (2024-2025)
-        # So: 2025, 2024, 2023, 2022, 2021
-        years = [2025, 2024, 2023, 2022, 2021]
-
-        # Limit teams for speed if needed, but user wants full 5 seasons.
-        # There are only ~11 unique teams.
-        # 11 teams * 5 seasons = 55 requests.
-        # 55 * 10s wait = 550s = ~9 mins.
-        # This is acceptable.
-
-        await scraper.scrape_all_teams(test_teams, years)
-
-        await scraper.stop()
-
-    asyncio.run(main())
+    asyncio.run(run_scraper())
