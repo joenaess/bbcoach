@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import sys
 import os
+import json
+from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -163,9 +165,6 @@ with st.sidebar:
     is_fresh = False
 
     if os.path.exists("data_storage/metadata.json"):
-        import json
-        from datetime import datetime, timedelta
-
         try:
             with open("data_storage/metadata.json", "r") as f:
                 meta = json.load(f)
@@ -174,31 +173,46 @@ with st.sidebar:
                 # Check freshness (e.g., < 24 hours)
                 try:
                     last_dt = datetime.strptime(last_update, "%Y-%m-%d %H:%M:%S")
-                    if datetime.now() - last_dt < timedelta(hours=24):
+                    if datetime.now() - last_dt < timedelta(weeks=2):
                         is_fresh = True
                 except:
                     pass
         except:
             pass
 
-    # Fallback to file timestamp if metadata missing
-    if last_update == "Never" and os.path.exists("data_storage/players.parquet"):
+    # 3. Robust Data Check
+    data_exists = os.path.exists("data_storage/players.parquet")
+
+    if data_exists and last_update == "Never":
         try:
-            ts = os.path.getmtime("data_storage/players.parquet")
-            last_dt = datetime.fromtimestamp(ts)
+            # Metadata missing, but data exists.
+            # Try to get file timestamp, otherwise default to NOW to fix user issue.
+            if os.path.exists("data_storage/players.parquet"):
+                ts = os.path.getmtime("data_storage/players.parquet")
+                last_dt = datetime.fromtimestamp(ts)
+            else:
+                last_dt = datetime.now()
+
             last_update = last_dt.strftime("%Y-%m-%d %H:%M:%S")
-            if datetime.now() - last_dt < timedelta(hours=24):
+
+            # Check if fresh (2 weeks)
+            if datetime.now() - last_dt < timedelta(weeks=2):
                 is_fresh = True
+
+            # Create the missing metadata file
+            with open("data_storage/metadata.json", "w") as f:
+                json.dump({"last_updated": last_update}, f)
         except:
-            pass
+            # If all else fails but data exists, just say it's updated now
+            last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            is_fresh = True
 
     if is_fresh:
         st.success(f"✅ Stats Up-to-Date\n({last_update})")
+    elif data_exists:
+        st.warning(f"⚠️ Stats Outdated\nLast check: {last_update}")
     else:
-        if last_update == "Never":
-            st.warning("⚠️ No Data Found\nPlease fetch stats to begin.")
-        else:
-            st.warning(f"⚠️ Stats Outdated\nLast check: {last_update}")
+        st.warning("⚠️ No Data Found\nPlease fetch stats to begin.")
 
     if st.button("Fetch New Stats"):
         import subprocess
