@@ -655,6 +655,7 @@ with tab3:
                             pd.DataFrame(chart_data),
                             st.session_state["coach_team"],
                             opponent_name,
+                            key="matchup_chart",
                         )
 
                     # --- AI ANALYSIS ---
