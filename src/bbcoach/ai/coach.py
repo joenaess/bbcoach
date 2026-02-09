@@ -23,14 +23,15 @@ class BasketballCoach:
     def _setup_provider(self):
         try:
             if self.provider == "gemini":
-                import google.generativeai as genai
+                from google import genai
 
                 if not self.api_key:
                     raise ValueError("Gemini API Key required")
-                genai.configure(api_key=self.api_key)
+                self.client = genai.Client(api_key=self.api_key)
                 # Use provided model or default
-                m = self.model_name if self.model_name else "gemini-2.0-flash"
-                self.model = genai.GenerativeModel(m)
+                self.model_name = (
+                    self.model_name if self.model_name else "gemini-2.0-flash"
+                )
 
             elif self.provider == "openai":
                 from openai import OpenAI
@@ -78,7 +79,9 @@ class BasketballCoach:
 
         try:
             if self.provider == "gemini":
-                response = self.model.generate_content(full_prompt)
+                response = self.client.models.generate_content(
+                    model=self.model_name, contents=full_prompt
+                )
                 return response.text
 
             elif self.provider == "openai":
