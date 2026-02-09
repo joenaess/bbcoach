@@ -1,0 +1,134 @@
+{
+  "selects": [
+    {
+      "id": "",
+      "name": "",
+      "options": [
+        {
+          "text": "2025-2026 Season",
+          "value": ""
+        },
+        {
+          "text": "2025-2026 Season",
+          "value": "/basketball/team/3014/umea"
+        },
+        {
+          "text": "2024-2025 Season",
+          "value": "/basketball/team/3014/umea/2024"
+        },
+        {
+          "text": "2023-2024 Season",
+          "value": "/basketball/team/3014/umea/2023"
+        },
+        {
+          "text": "2022-2023 Season",
+          "value": "/basketball/team/3014/umea/2022"
+        },
+        {
+          "text": "2021-2022 Season",
+          "value": "/basketball/team/3014/umea/2021"
+        },
+        {
+          "text": "2020-2021 Season",
+          "value": "/basketball/team/3014/umea/2020"
+        },
+        {
+          "text": "2019-2020 Season",
+          "value": "/basketball/team/3014/umea/2019"
+        },
+        {
+          "text": "2018-2019 Season",
+          "value": "/basketball/team/3014/umea/2018"
+        },
+        {
+          "text": "2017-2018 Season",
+          "value": "/basketball/team/3014/umea/2017"
+        },
+        {
+          "text": "2016-2017 Season",
+          "value": "/basketball/team/3014/umea/2016"
+        },
+        {
+          "text": "2015-2016 Season",
+          "value": "/basketball/team/3014/umea/2015"
+        },
+        {
+          "text": "2014-2015 Season",
+          "value": "/basketball/team/3014/umea/2014"
+        }
+      ]
+    },
+    {
+      "id": "",
+      "name": "",
+      "options": [
+        {
+          "text": "Averages",
+          "value": "average-190"
+        },
+        {
+          "text": "Accumulated",
+          "value": "accumulated-190"
+        },
+        {
+          "text": "Per 36 minutes",
+          "value": "per36-190"
+        },
+        {
+          "text": "Per 40 minutes",
+          "value": "per40-190"
+        },
+        {
+          "text": "Advanced",
+          "value": "advanced-190"
+        },
+        {
+          "text": "Scoring split",
+          "value": "scoring-190"
+        },
+        {
+          "text": "Usage split",
+          "value": "usage-190"
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "SWEDEN - BASKETLIGAN"
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "SWEDEN - BASKETLIGAN"
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan/teams",
+      "text": "\n                    Team\n                "
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "Sweden - Basketligan"
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "Sweden - Basketligan"
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "Sweden - Basketligan"
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "Sweden - Basketligan"
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "Sweden - Basketligan"
+    },
+    {
+      "href": "https://www.proballers.com/basketball/league/190/sweden-basketligan",
+      "text": "Sweden - Basketligan"
+    }
+  ]
+}

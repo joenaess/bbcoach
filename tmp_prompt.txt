@@ -1,0 +1,96 @@
+
+
+    Matchup Analysis (Season 2025):
+    Your Team (Est. Rotation Output): 101.5 PPG, 32.3 RPG
+    Opponent (Est. Rotation Output): 90.9 PPG, 32.8 RPG
+    
+    Key Insight:
+    - Scoring Edge: You (+10.6)
+    - Best Scorer Matchup: Charles Barton vs Ali Sow
+    
+
+    DEEP MATCHUP ANALYSIS (Season 2025)
+    ======================================
+    Team Comparison (Rotation of Top 8):
+    Your Team: 101.5 PPG | 32.3 RPG | 18.7 APG | 42.5% 3P
+    Opponent : 90.9 PPG | 32.8 RPG | 17.9 APG | 47.5% 3P
+    
+    Projected Outcome:
+    Scoring Differential: +10.6 points (Advantage You)
+    
+    Key Individual Matchups:
+    1. Top Scorer: Charles Barton (22.8) vs Ali Sow (20.3) -> Edge: You
+    2. Playmaker: Charles Barton (6.8) vs Ali Sow (6.0) -> Edge: You
+    3. Paint/Reb: A.J. Cheeseman (6.7) vs Justin Vander Baan (8.1) -> Edge: Opponent
+    
+    Tactical Notes:
+    - 3-Point Threat: Opponent has better shooters.
+    - Ball Security: Opponent calculates fewer turnovers.
+    
+
+
+    DEEP MATCHUP ANALYSIS (Season 2025)
+    ======================================
+    Team Comparison (Rotation of Top 8):
+    Your Team: 101.5 PPG | 32.3 RPG | 18.7 APG | 42.5% 3P
+    Opponent : 90.9 PPG | 32.8 RPG | 17.9 APG | 47.5% 3P
+
+    Projected Outcome:
+    Scoring Differential: +10.6 points (Advantage You)
+
+    Key Individual Matchups:
+    1. Top Scorer: Charles Barton (22.8) vs Ali Sow (20.3) -> Edge: You
+    2. Playmaker: Charles Barton (6.8) vs Ali Sow (6.0) -> Edge: You
+    3. Paint/Reb: A.J. Cheeseman (6.7) vs Justin Vander Baan (8.1) -> Edge: Opponent
+
+    Tactical Notes:
+    - 3-Point Threat: Opponent has better shooters.
+    - Ball Security: Opponent calculates fewer turnovers.
+    
+    PROJECTED LINEUPS & ROTATION
+    ============================
+    Your Starters: Charles Barton (22.8p/2.6r/6.8a), Anes Zekovic (12.6p/4.9r/1.7a), A.J. Cheeseman (20.0p/6.7r/1.3a), Jonathan Peleg (14.7p/4.4r/3.0a), Tony Vitali (12.2p/6.5r/1.6a)
+    Your Key Bench: Isaiah Hill (7.7p/3.0r/1.3a), Alexander Karras (7.1p/1.3r/0.5a)
+    
+    Opponent Starters: A.J. Clayton (15.6p/5.8r/1.3a), Ali Sow (20.3p/4.0r/6.0a), Oskar Palmquist (9.0p/3.7r/1.2a), KJ Jenkins (16.0p/3.0r/3.0a), Justin Vander Baan (8.8p/8.1r/1.5a)
+    Opponent Key Bench: John Brandmark (3.1p/3.4r/1.3a), Ludvig Johansson (6.1p/2.1r/2.9a)
+    
+FULL YOUR TEAM ROSTER STATS (Season 2025):
+Name | PPG | RPG | APG | FG% | 3P% | TO
+--- | --- | --- | --- | --- | --- | ---
+Charles Barton | 22.8 | 2.6 | 6.8 | 32.7% | 45.5% | 2.2
+A.J. Cheeseman | 20.0 | 6.7 | 1.3 | 33.3% | 45.8% | 2.7
+Jonathan Peleg | 14.7 | 4.4 | 3.0 | 32.4% | 45.3% | 2.3
+Anes Zekovic | 12.6 | 4.9 | 1.7 | 32.9% | 36.6% | 3.3
+Tony Vitali | 12.2 | 6.5 | 1.6 | 53.3% | 56.2% | 3.2
+Isaiah Hill | 7.7 | 3.0 | 1.3 | 30.0% | 40.1% | 2.7
+Alexander Karras | 7.1 | 1.3 | 0.5 | 38.7% | 39.2% | 1.8
+Jan Tratnik | 4.4 | 2.9 | 2.5 | 29.7% | 31.4% | 2.4
+Mario Drazic | 2.6 | 2.7 | 0.6 | 0.0% | 68.0% | 2.1
+Ephraim Bahati | 1.4 | 1.2 | 0.2 | 0.0% | 45.0% | 0.9
+Lukas Widmark | 0.4 | 0.4 | 0.2 | 0.0% | 25.0% | 0.0
+Jesper Hallberg | 0 | 0 | 0 | 0% | 0% | 0
+Alem Hamza | 0 | 0 | 0 | 0% | 0% | 0
+Lazar Vladisavljevic | 0 | 0 | 0 | 0% | 0% | 0
+Emil Lundstedt | 0.0 | 0.3 | 0.7 | 0.0% | 0.0% | 0.3
+Herman Kihlman | 0 | 0 | 0 | 0% | 0% | 0
+
+FULL OPPONENT ROSTER STATS (Season 2025):
+Name | PPG | RPG | APG | FG% | 3P% | TO
+--- | --- | --- | --- | --- | --- | ---
+Ali Sow | 20.3 | 4.0 | 6.0 | 39.5% | 52.5% | 2.2
+KJ Jenkins | 16.0 | 3.0 | 3.0 | 35.0% | 39.4% | 1.7
+A.J. Clayton | 15.6 | 5.8 | 1.3 | 41.1% | 51.0% | 1.6
+William Gutenius | 11.0 | 3.5 | 1.0 | 40.8% | 49.0% | 1.9
+Oskar Palmquist | 9.0 | 3.7 | 1.2 | 29.8% | 49.0% | 1.8
+Justin Vander Baan | 8.8 | 8.1 | 1.5 | 24.0% | 52.5% | 1.7
+Ludvig Johansson | 6.1 | 2.1 | 2.9 | 40.7% | 47.2% | 2.5
+Fredrik Andersson | 4.1 | 2.6 | 1.0 | 31.0% | 39.0% | 1.8
+Andreas Person | 3.8 | 2.0 | 0.9 | 28.1% | 34.1% | 2.0
+John Brandmark | 3.1 | 3.4 | 1.3 | 18.6% | 34.9% | 2.1
+Filip Larsson | 0 | 0 | 0 | 0% | 0% | 0
+Melvin Fredenlund | 0 | 0 | 0 | 0% | 0% | 0
+Albin Ringheim | 0 | 0 | 0 | 0% | 0% | 0
+
+
+
