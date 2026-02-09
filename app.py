@@ -10,7 +10,11 @@ load_dotenv()
 sys.path.append(os.path.abspath("src"))
 
 from bbcoach.data.storage import load_players, load_teams
-from bbcoach.ui.components import render_player_card, render_stat_metric
+from bbcoach.ui.components import (
+    render_player_card,
+    render_stat_metric,
+    render_comparison_chart,
+)
 
 # Lazy load AI model to avoid long startup time if not needed immediately
 # from bbcoach.ai.coach import BasketballCoach
@@ -177,10 +181,24 @@ with st.sidebar:
         except:
             pass
 
+    # Fallback to file timestamp if metadata missing
+    if last_update == "Never" and os.path.exists("data_storage/players.parquet"):
+        try:
+            ts = os.path.getmtime("data_storage/players.parquet")
+            last_dt = datetime.fromtimestamp(ts)
+            last_update = last_dt.strftime("%Y-%m-%d %H:%M:%S")
+            if datetime.now() - last_dt < timedelta(hours=24):
+                is_fresh = True
+        except:
+            pass
+
     if is_fresh:
         st.success(f"✅ Stats Up-to-Date\n({last_update})")
     else:
-        st.warning(f"⚠️ Stats Outdated\n({last_update})")
+        if last_update == "Never":
+            st.warning("⚠️ No Data Found\nPlease fetch stats to begin.")
+        else:
+            st.warning(f"⚠️ Stats Outdated\nLast check: {last_update}")
 
     if st.button("Fetch New Stats"):
         import subprocess
@@ -259,10 +277,7 @@ def clear_context():
 
 
 # Sidebar
-st.sidebar.title("Navigation")
-page = st.sidebar.radio(
-    "Go to", ["League Stats", "Player Comparison", "Game Predictor", "Coach's Corner"]
-)
+st.sidebar.title("Settings")
 
 # --- CONTEXT RESET ---
 with st.sidebar:
@@ -309,13 +324,14 @@ else:
     st.session_state["coach_team"] = None
 
 # --- TABS ---
-# --- MAIN CONTENT ---
-# Tabs replaced by Sidebar Navigation
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["League Stats", "Player Comparison", "Game Predictor", "Coach's Corner"]
+)
 
 # ------------------------------------------------------------------
 # TAB 1: League Stats
 # ------------------------------------------------------------------
-if page == "League Stats":
+with tab1:
     if not players_df.empty:
         # Move season selection UP so selected_season is available
         selected_season = st.selectbox(
@@ -416,7 +432,7 @@ if page == "League Stats":
     # ------------------------------------------------------------------
     # TAB 2: Player Comparison (Analytics)
     # ------------------------------------------------------------------
-if page == "Player Comparison":
+with tab2:
     st.header("🔬 Player Comparison")
 
     if not players_df.empty:
@@ -473,7 +489,7 @@ if page == "Player Comparison":
 # ------------------------------------------------------------------
 # TAB 3: Game Predictor
 # ------------------------------------------------------------------
-if page == "Game Predictor":
+with tab3:
     st.header("Matchup & Scouting")
 
     # Sub-tabs for Predictor vs Scouting Report
@@ -491,13 +507,16 @@ if page == "Game Predictor":
             sorted(players_df["season"].unique(), reverse=True),
             key="pred_season",
         )
-        use_multi_season = st.checkbox(
-            "Include Multi-Season Trend Analysis?", value=False
-        )
 
-        if st.button("Analyze Matchup"):
+        with st.expander("⚙️ Advanced Settings"):
+            use_multi_season = st.checkbox(
+                "Include Multi-Season Trend Analysis?", value=False
+            )
+
+        if st.button("Analyze Matchup", type="primary"):
             if not opponent_record.empty and st.session_state.get("coach_team"):
                 opp_id = opponent_record.iloc[0]["id"]
+                st.divider()
 
                 # Get Coach Team ID
                 coach_record = teams_df[
@@ -506,25 +525,100 @@ if page == "Game Predictor":
                 if not coach_record.empty:
                     coach_id = coach_record.iloc[0]["id"]
 
-                    # 1. Single Season Analysis
-                    analysis = predict_matchup(players_df, coach_id, opp_id, season)
-                    st.text(analysis)
+                    # --- VISUALIZATION ---
+                    # Calculate aggregate stats for chart
+                    my_team_stats = players_df[
+                        (players_df["team_id"] == coach_id)
+                        & (players_df["season"] == season)
+                    ]
+                    opp_team_stats = players_df[
+                        (players_df["team_id"] == opp_id)
+                        & (players_df["season"] == season)
+                    ]
 
-                    # 2. Multi-Season Analysis (Optional)
-                    if use_multi_season:
-                        from bbcoach.analysis import predict_matchup_multi_season
+                    if not my_team_stats.empty and not opp_team_stats.empty:
+                        # Helper to get team avg
+                        def get_avg(df, col):
+                            return round(df[col].mean(), 1)
 
-                        trend_analysis = predict_matchup_multi_season(
-                            players_df, coach_id, opp_id
+                        chart_data = [
+                            {
+                                "Metric": "PPG",
+                                "Value": get_avg(my_team_stats, "PPG"),
+                                "Entity": st.session_state["coach_team"],
+                            },
+                            {
+                                "Metric": "PPG",
+                                "Value": get_avg(opp_team_stats, "PPG"),
+                                "Entity": opponent_name,
+                            },
+                            {
+                                "Metric": "RPG",
+                                "Value": get_avg(my_team_stats, "RPG"),
+                                "Entity": st.session_state["coach_team"],
+                            },
+                            {
+                                "Metric": "RPG",
+                                "Value": get_avg(opp_team_stats, "RPG"),
+                                "Entity": opponent_name,
+                            },
+                            {
+                                "Metric": "APG",
+                                "Value": get_avg(my_team_stats, "APG"),
+                                "Entity": st.session_state["coach_team"],
+                            },
+                            {
+                                "Metric": "APG",
+                                "Value": get_avg(opp_team_stats, "APG"),
+                                "Entity": opponent_name,
+                            },
+                        ]
+                        render_comparison_chart(
+                            pd.DataFrame(chart_data),
+                            st.session_state["coach_team"],
+                            opponent_name,
                         )
-                        st.text(trend_analysis)
-                        analysis += "\n" + trend_analysis
 
-                    # Button to save
-                    if st.button("Save to Context"):
-                        st.session_state["prediction_context"] = analysis
-                        save_context(analysis)
-                        st.success("Analysis saved to AI Context!")
+                    # --- AI ANALYSIS ---
+                    with st.spinner("Asking Assistant Coach..."):
+                        # 1. Single Season Analysis
+                        analysis = predict_matchup(players_df, coach_id, opp_id, season)
+                        st.markdown("### 🧠 Coach's Analysis")
+                        st.markdown(analysis)
+
+                        # 2. Multi-Season Analysis (Optional)
+                        if use_multi_season:
+                            from bbcoach.analysis import predict_matchup_multi_season
+
+                            trend_analysis = predict_matchup_multi_season(
+                                players_df, coach_id, opp_id
+                            )
+                            st.divider()
+                            st.markdown("### 📈 Historical Trends")
+                            st.markdown(trend_analysis)
+                            analysis += "\n\n" + trend_analysis
+
+                        # Button to save
+                        col_save, col_dl = st.columns(2)
+                        with col_save:
+                            if st.button("Save to Context"):
+                                st.session_state["prediction_context"] = analysis
+                                save_context(analysis)
+                                st.success("Analysis saved to AI Context!")
+
+                        with col_dl:
+                            game_plan_text = f"# 🏀 Game Plan: {st.session_state['coach_team']} vs {opponent_name}\n\n"
+                            game_plan_text += f"**Season:** {season}\n"
+                            game_plan_text += f"**Date:** {pd.Timestamp.now().strftime('%Y-%m-%d')}\n\n"
+                            game_plan_text += "---\n\n"
+                            game_plan_text += analysis
+
+                            st.download_button(
+                                label="Download Game Plan 📥",
+                                data=game_plan_text,
+                                file_name=f"game_plan_{opponent_name}_{pd.Timestamp.now().strftime('%Y%m%d')}.md",
+                                mime="text/markdown",
+                            )
                 else:
                     st.error("Please select your Coach Team in the sidebar first.")
 
@@ -591,7 +685,7 @@ if page == "Game Predictor":
 # ------------------------------------------------------------------
 # TAB 4: Coach's Corner
 # ------------------------------------------------------------------
-if page == "Coach's Corner":
+with tab4:
     st.header("Coach's Corner 🧠")
     coach_team = st.session_state.get("coach_team", "a team")
     st.write(f"As the coach of **{coach_team}**, ask about your players or opponents.")

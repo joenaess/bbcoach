@@ -38,3 +38,37 @@ def render_stat_metric(label, value, delta=None, color=None):
     Wrapper for st.metric with custom styling hooks if needed.
     """
     st.metric(label=label, value=value, delta=delta)
+
+
+def render_comparison_chart(
+    df, team1_name, team2_name, metrics=["PPG", "RPG", "APG", "3P%"]
+):
+    """
+    Renders a grouped bar chart comparing two teams/players across metrics.
+    Expects df with columns: ['Metric', 'Value', 'Entity']
+    """
+    import plotly.express as px
+    import pandas as pd
+
+    # Check if df is already long format or needs melting
+    # ... logic handled by caller usually, but let's make it robust
+
+    fig = px.bar(
+        df,
+        x="Metric",
+        y="Value",
+        color="Entity",
+        barmode="group",
+        color_discrete_sequence=["#FF5722", "#BDC1C6"],
+        template="plotly_dark",
+    )
+
+    fig.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font_family="Inter",
+        legend_title_text="",
+        margin=dict(l=20, r=20, t=30, b=20),
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
