@@ -2,7 +2,7 @@ import asyncio
 import json
 import random
 from typing import List, Dict
-from playwright.async_api import async_playwright, Page, BrowserContext
+from playwright.async_api import async_playwright, Page
 import sys
 import os
 
@@ -109,7 +109,7 @@ class BasketballScraper:
                             "raw_stats": p["stats"],
                         }
                     )
-                except:
+                except Exception:
                     pass
 
             return {

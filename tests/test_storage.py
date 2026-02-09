@@ -1,5 +1,4 @@
 import pytest
-import pandas as pd
 from bbcoach.data.storage import (
     save_players,
     load_players,

@@ -11,16 +11,15 @@ load_dotenv()
 # Add src to path
 sys.path.append(os.path.abspath("src"))
 
-from bbcoach.data.storage import load_players, load_teams, load_schedule
-from bbcoach.ui.components import (
+from bbcoach.data.storage import load_players, load_teams, load_schedule  # noqa: E402
+from bbcoach.ui.components import (  # noqa: E402
     render_player_card,
-    render_stat_metric,
     render_comparison_chart,
 )
 
 # Lazy load AI model to avoid long startup time if not needed immediately
 # from bbcoach.ai.coach import BasketballCoach
-from bbcoach.analysis import predict_matchup
+from bbcoach.analysis import predict_matchup  # noqa: E402
 
 st.set_page_config(
     page_title="Swedish Basketball League Coach", layout="wide", page_icon="🏀"
@@ -177,9 +176,9 @@ with st.sidebar:
                     )
                     if datetime.datetime.now() - last_dt < datetime.timedelta(weeks=2):
                         is_fresh = True
-                except:
+                except Exception:
                     pass
-        except:
+        except Exception:
             pass
 
     # 3. Robust Data Check
@@ -204,7 +203,7 @@ with st.sidebar:
             # Create the missing metadata file
             with open("data_storage/metadata.json", "w") as f:
                 json.dump({"last_updated": last_update}, f)
-        except:
+        except Exception:
             # If all else fails but data exists, just say it's updated now
             last_update = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             is_fresh = True
@@ -266,7 +265,7 @@ with st.sidebar:
                 st.success("Stats successfully updated!")
                 st.rerun()
             else:
-                st.error(f"Error fetching stats. Check logs.")
+                st.error("Error fetching stats. Check logs.")
 
         except Exception as e:
             st.error(f"Execution Error: {e}")
@@ -392,7 +391,7 @@ with tab5:
                 team_schedule["date"], errors="coerce"
             )
             team_schedule = team_schedule.sort_values("date_dt")
-        except:
+        except Exception:
             pass
 
         # Display
@@ -478,7 +477,7 @@ with tab1:
                         "EFF": raw[-4] if len(raw) > 20 else "N/A",
                     }
                 )
-            except:
+            except Exception:
                 continue
 
         if display_data:
@@ -853,7 +852,7 @@ with tab4:
                                 roster_summary.append(
                                     f"{p['name']}: {raw[3]} PPG, {raw[4]} RPG, {raw[5]} APG, {raw[10]} 3P%"
                                 )
-                            except:
+                            except Exception:
                                 continue
 
                         # Top 10 by PPG (approx)
@@ -888,7 +887,7 @@ with tab4:
                         raw = p["raw_stats"]
                         # Detailed stats for mentioned players
                         context += f"- {p['name']} ({p['season']}): {raw[3]} PPG, {raw[4]} RPG, {raw[5]} APG, {raw[9]} FG%, {raw[10]} 3P%, {raw[18]} TO\n"
-                    except:
+                    except Exception:
                         pass
 
             response = st.session_state.coach.ask(context, prompt)
@@ -928,7 +927,7 @@ with st.sidebar.expander("Analysis Tools"):
             st.session_state["prediction_context"] = (
                 analysis  # Keep session state for immediate feedback
             )
-            st.success(f"Analysis saved to tmp_prompt.txt!")
+            st.success("Analysis saved to tmp_prompt.txt!")
             st.markdown(f"**Preview:**\\n{analysis}")
     else:
         st.info("Select a Coach Team first.")

@@ -1,6 +1,4 @@
 import py_compile
-import sys
-import os
 
 files = ["app.py", "src/bbcoach/data/scrapers.py", "src/bbcoach/data/storage.py"]
 

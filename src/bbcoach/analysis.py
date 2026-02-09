@@ -1,6 +1,3 @@
-import pandas as pd
-
-
 def get_team_aggregates(players_df, team_id, season):
     """
     Aggregates player stats to estimate team strength for a given season.
@@ -27,7 +24,7 @@ def get_team_aggregates(players_df, team_id, season):
     def parse_stat(val):
         try:
             return float(val)
-        except:
+        except Exception:
             return 0.0
 
     # Extract numeric stats from raw_stats array
@@ -50,7 +47,7 @@ def get_team_aggregates(players_df, team_id, season):
             # Let's try to detect.
             # Height (index 2 or 1) usually contains 'm'.
 
-            offset = 0
+            # offset = 0 # Unused
             if "m" in str(raw[1]):  # Standard: 0:#, 1:Name, 2:Height
                 # This seems unlikely for 'td' scrape if name is in 'a' inside 'td'.
                 # Scraper gets all 'td'.
@@ -136,7 +133,7 @@ def get_team_aggregates(players_df, team_id, season):
                     }
                 )
 
-        except:
+        except Exception:
             continue
 
     # Sort by PPG to get rotation

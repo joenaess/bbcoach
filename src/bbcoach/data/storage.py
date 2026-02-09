@@ -61,7 +61,7 @@ def load_players() -> pd.DataFrame:
                 try:
                     val = row[idx]
                     return float(val) if val != "-" else 0.0
-                except:
+                except Exception:
                     return 0.0
 
             # Vectorized approach or apply? Apply is safer for arrays
@@ -82,7 +82,7 @@ def load_players() -> pd.DataFrame:
                 try:
                     val = str(row[idx]).replace("%", "")
                     return float(val) if val != "-" else 0.0
-                except:
+                except Exception:
                     return 0.0
 
             df["3P%"] = df["raw_stats"].apply(lambda x: extract_pct(x, 10))

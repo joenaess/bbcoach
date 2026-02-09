@@ -1,4 +1,3 @@
-import pandas as pd
 import sys
 import os
 
@@ -27,7 +26,7 @@ if not teams.empty:
                 f"  Success: {stats['roster_size']} players, {stats['total_ppg']:.1f} PPG"
             )
         else:
-            print(f"  FAILED: No data returned from get_team_aggregates")
+            print("  FAILED: No data returned from get_team_aggregates")
             # Dig deeper
             team_players = players[
                 (players["team_id"] == team["id"])
