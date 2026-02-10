@@ -20,6 +20,7 @@ from bbcoach.ui.components import (  # noqa: E402
 # Lazy load AI model to avoid long startup time if not needed immediately
 # from bbcoach.ai.coach import BasketballCoach
 from bbcoach.analysis import predict_matchup  # noqa: E402
+from bbcoach.rag.pipeline import RAGPipeline  # noqa: E402
 
 st.set_page_config(
     page_title="Swedish Basketball League Coach", layout="wide", page_icon="🏀"
@@ -369,13 +370,14 @@ else:
     st.session_state["coach_team"] = None
 
 # --- TABS ---
-tab1, tab2, tab3, tab4, tab5 = st.tabs(
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
     [
         "League Stats",
         "Player Comparison",
         "Game Predictor",
         "Coach's Corner",
         "Schedule",
+        "Knowledge Base",
     ]
 )
 
@@ -418,7 +420,7 @@ with tab5:
         # Date format might be string, let's try to convert for sorting
         try:
             team_schedule["date_dt"] = pd.to_datetime(
-                team_schedule["date"], errors="coerce"
+                team_schedule["date"], errors="coerce", format="mixed"
             )
             team_schedule = team_schedule.sort_values("date_dt")
         except Exception:
@@ -944,6 +946,40 @@ with tab4:
                     except Exception:
                         pass
 
+            # 4. RAG / Knowledge Base Integration
+            # Query the vector store for relevant drills/plays
+            try:
+                pipeline = RAGPipeline()
+                # Get top 3 results
+                results = pipeline.query(prompt, n=3)
+
+                if results and results["documents"] and results["documents"][0]:
+                    rag_context = (
+                        "\n=== KNOWLEDGE BASE RESOURCES (Breakthrough Basketball) ===\n"
+                    )
+                    rag_context += "Use the following drills or plays to answer the user's question if relevant:\n\n"
+
+                    # Store metadata to show to user
+                    used_resources = []
+
+                    for i, doc in enumerate(results["documents"][0]):
+                        meta = results["metadatas"][0][i]
+                        title = meta.get("title", "Untitled")
+                        url = meta.get("url", "#")
+                        rag_context += f"Resource {i + 1}: {title}\nContent: {doc}\n\n"
+                        used_resources.append({"title": title, "url": url})
+
+                    context += rag_context
+
+                    # Show the user what we found
+                    with message_placeholder.container():
+                        with st.expander("📚 Consulted Knowledge Base", expanded=False):
+                            for res in used_resources:
+                                st.markdown(f"- [{res['title']}]({res['url']})")
+            except Exception as e:
+                # Don't crash chat if RAG fails
+                print(f"RAG Error: {e}")
+
             response = st.session_state.coach.ask(context, prompt)
 
             # Show which model was used
@@ -985,3 +1021,85 @@ with st.sidebar.expander("Analysis Tools"):
             st.markdown(f"**Preview:**\\n{analysis}")
     else:
         st.info("Select a Coach Team first.")
+# ------------------------------------------------------------------
+# TAB 6: Knowledge Base
+# ------------------------------------------------------------------
+with tab6:
+    st.header("📚 Coach's Knowledge Base")
+    st.markdown(
+        "Access thousands of basketball drills and plays from _Breakthrough Basketball_."
+    )
+
+    # Status/Ingestion
+    with st.expander("Manage Knowledge Base", expanded=False):
+        st.info(
+            "The Knowledge Base is processed locally. Updating it may take a few minutes."
+        )
+
+        col_kp1, col_kp2 = st.columns([1, 1])
+        with col_kp1:
+            if st.button("Update Knowledge Base (Scrape & Index)"):
+                with st.spinner(
+                    "Scraping Breakthrough Basketball and indexing content..."
+                ):
+                    try:
+                        # Use a persistent pipeline instance or create new
+                        pipeline = RAGPipeline()
+                        # Start from main drills page and crawl a bit
+                        count = pipeline.run_ingestion(
+                            [
+                                "https://www.breakthroughbasketball.com/drills/basketballdrills.html"
+                            ],
+                            max_depth=1,
+                            max_pages=30,
+                        )
+                        st.success(f"Successfully indexed {count} new documents!")
+                    except Exception as e:
+                        st.error(f"Error updating knowledge base: {e}")
+
+        with col_kp2:
+            if st.button("Reset Knowledge Base"):
+                try:
+                    pipeline = RAGPipeline()
+                    pipeline.reset_db()
+                    st.success("Knowledge Base reset.")
+                except Exception as e:
+                    st.error(f"Error resetting: {e}")
+
+    # Search Interface
+    st.subheader("Search Drills & Plays")
+
+    # Initialize session state for search
+    if "kb_search_query" not in st.session_state:
+        st.session_state["kb_search_query"] = ""
+
+    search_query = st.text_input(
+        "What are you looking for?",
+        placeholder="e.g., 'shooting drills for youth', 'zone defense plays'",
+        key="kb_search_input",
+    )
+
+    if search_query:
+        pipeline = RAGPipeline()
+        results = pipeline.query(search_query, n=5)
+
+        if results and results["documents"] and results["documents"][0]:
+            st.markdown(f"**Found {len(results['documents'][0])} results:**")
+
+            for i, doc in enumerate(results["documents"][0]):
+                meta = results["metadatas"][0][i]
+                title = meta.get("title", "Untitled Resource")
+                url = meta.get("url", "#")
+
+                with st.container():
+                    st.markdown(f"### [{title}]({url})")
+                    st.caption(f"Source: {url}")
+                    # Show preview of markdown content
+                    # Truncate content for preview if too long, or use an expander
+                    with st.expander("View Content", expanded=(i == 0)):
+                        st.markdown(doc)
+                    st.divider()
+        else:
+            st.info(
+                "No matching drills found. Try a different search term or update the Knowledge Base."
+            )

@@ -1,0 +1,978 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="canonical" href="https://www.breakthroughbasketball.com/" />
+<link rel="alternate" href="https://www.breakthroughbasketball.com/" hreflang="en" />
+<meta name="description" content="Main Navigation Page: Details Basketball camps, resources, and store products">
+	<meta charset="utf-8">
+	<meta property="fb:page_id" content="34972797086" />
+    <meta property="fb:admins" content="17005768" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="keywords" CONTENT="basketball coaching tips, basketball coaching training" />
+	<meta name="verify-v1" content="ljZdyqyu9cw3qPYfq/m3YVEMXNvVybb/cgP5x6PUz1A=" />
+	<title>Breakthrough Basketball - Hundreds of FREE Basketball Coaching Drills, Plays, Tips, Offenses, Defenses & Resources</title>
+	<meta name="description" content="">
+	<meta name="author" content="">
+<meta name="facebook-domain-verification" content="yjxib10nimmjxijuuidfutcwagvuxu" />
+
+
+
+<script>
+window.addEventListener("DOMContentLoaded", function () {
+  fetch('/pastnewsletters.html')
+    .then(res => res.text())
+    .then(html => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const now = new Date();
+
+      const articles = Array.from(doc.querySelectorAll('.article-item')).filter(item => {
+        const showDateStr = item.getAttribute('data-show-date');
+        if (showDateStr) {
+          const showDate = new Date(showDateStr);
+          return showDate <= now;
+        }
+        return true; // include if no data-show-date (i.e. not delayed)
+      }).slice(0, 15);
+
+      const col1 = document.getElementById('drills-col-1');
+      const col2 = document.getElementById('drills-col-2');
+
+      articles.forEach((item, index) => {
+        const link = item.querySelector('a');
+        const href = link?.getAttribute('href') || '#';
+        let title = link ? link.textContent.trim() : 'No title';
+
+        const textNodes = Array.from(item.childNodes).filter(
+          n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0
+        );
+
+        if (textNodes.length > 0 && link && item.contains(link) && item.innerHTML.includes('<br')) {
+          const afterBrText = item.innerHTML.split(/<br\s*\/?>/i)[1];
+          if (afterBrText && afterBrText.trim().length > 0) {
+            title = afterBrText.trim();
+          }
+        }
+
+        const span = document.createElement('span');
+        span.innerHTML = `${index + 1}. <a href="${href}">${title}</a><br/>`;
+
+        if (index < 8) {
+          col1.appendChild(span);
+        } else {
+          col2.appendChild(span);
+        }
+      });
+    })
+    .catch(err => {
+      console.error('Error loading dynamic articles:', err);
+    });
+});
+</script>
+
+
+
+
+	<!--begin bbHeadOut -->
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!--favicons-->
+	<!--<link rel="apple-touch-icon" sizes="57x57" href="/favicons/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/favicons/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/favicons/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/favicons/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/favicons/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/favicons/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/favicons/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/favicons/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="/favicons/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/favicons/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
+	<link rel="manifest" href="/favicons/manifest.json">
+	<meta name="msapplication-TileColor" content="#f3871b">
+	<meta name="msapplication-TileImage" content="/favicons/ms-icon-144x144.png">
+	<meta name="theme-color" content="#f3871b">-->
+	
+	<link rel="apple-touch-icon" sizes="57x57" href="/faviconsBreakthrough/apple-icon-57x57.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/faviconsBreakthrough/apple-icon-60x60.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/faviconsBreakthrough/apple-icon-72x72.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/faviconsBreakthrough/apple-icon-76x76.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/faviconsBreakthrough/apple-icon-114x114.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/faviconsBreakthrough/apple-icon-120x120.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/faviconsBreakthrough/apple-icon-144x144.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/faviconsBreakthrough/apple-icon-152x152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/faviconsBreakthrough/apple-icon-180x180.png">
+	<link rel="icon" type="image/png" sizes="192x192"  href="/faviconsBreakthrough/android-icon-192x192.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/faviconsBreakthrough/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/faviconsBreakthrough/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/faviconsBreakthrough/favicon-16x16.png">
+	<link rel="manifest" href="/faviconsBreakthrough/manifest.json">
+	<meta name="msapplication-TileColor" content="#f3871b">
+	<meta name="msapplication-TileImage" content="/faviconsBreakthrough/ms-icon-144x144.png">
+	<meta name="theme-color" content="#f3871b">
+	
+	<!-- <link href="https://fonts.googleapis.com/css?family=Lato:300,300i,400,400i,700,700i|Oswald:300,400,700" rel="stylesheet"> -->
+	<link href="https://plus.google.com/103006760219707222164" rel="publisher" />
+	<link rel="stylesheet" type="text/css" href="/scripts/css/obscure.css" />
+	
+	<!-- inline font styles so .woff files are loaded asap if needed -->
+	<style>@font-face{font-family:Oswald;font-style:normal;font-weight:300;src:local('Oswald Light'),local('Oswald-Light'),url(/f/o300.woff2) format('woff2'),url(/f/o300.woff) format('woff')}@font-face{font-family:Oswald;font-style:normal;font-weight:400;src:local('Oswald Regular'),local('Oswald-Regular'),url(/f/o400r.woff2) format('woff2'),url(/f/o400r.woff) format('woff')}@font-face{font-family:Oswald;font-style:normal;font-weight:700;src:local('Oswald Bold'),local('Oswald-Bold'),url(/f/o700.woff2) format('woff2'),url(/f/o700.woff) format('woff')}@font-face{font-family:Lato;font-style:normal;font-weight:300;src:local('Lato Light'),local('Lato-Light'),url(/f/l300.woff2) format('woff2'),url(/f/l300.woff) format('woff')}@font-face{font-family:Lato;font-style:italic;font-weight:300;src:local('Lato Light Italic'),local('Lato-LightItalic'),url(/f/l300i.woff2) format('woff2'),url(/f/l300i.woff) format('woff')}@font-face{font-family:Lato;font-style:normal;font-weight:400;src:local('Lato Regular'),local('Lato-Regular'),url(/f/l400r.woff2) format('woff2'),url(/f/l400r.woff) format('woff')}@font-face{font-family:Lato;font-style:italic;font-weight:400;src:local('Lato Italic'),local('Lato-Italic'),url(/f/l400i.woff2) format('woff2'),url(/f/l400i.woff) format('woff')}@font-face{font-family:Lato;font-style:italic;font-weight:700;src:local('Lato Bold Italic'),local('Lato-BoldItalic'),url(/f/l700i.woff2) format('woff2'),url(/f/l700i.woff) format('woff')}@font-face{font-family:Lato;font-style:normal;font-weight:700;src:local('Lato Bold'),local('Lato-Bold'),url(/f/l700.woff2) format('woff2'),url(/f/l700.woff) format('woff')}</style>
+	
+	<!-- adding 'Cabin' font for optinmonster -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<!--<link href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet"> -->
+	
+	 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+
+	<link rel="stylesheet" type="text/css" href="/scripts/css/style-2018wf.css?force=20211112" />
+
+	<!--new adroll pixel added 11/30/2021 (see email same day)-->
+
+
+	<!-- new clarity script added 9/4/2025 -->
+	<script type="text/javascript">
+		(function(c,l,a,r,i,t,y){
+			c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+			t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+			y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+		})(window, document, "clarity", "script", "t5cxpptd0h");
+	</script>
+	
+	
+	
+	<!-- Start of LiveChat (www.livechatinc.com) code -->
+<!--
+<script>
+    window.__lc = window.__lc || {};
+    window.__lc.license = 13328490;
+    ;(function(n,t,c){function i(n){return e._h?e._h.apply(null,n):e._q.push(n)}var e={_q:[],_h:null,_v:"2.0",on:function(){i(["on",c.call(arguments)])},once:function(){i(["once",c.call(arguments)])},off:function(){i(["off",c.call(arguments)])},get:function(){if(!e._h)throw new Error("[LiveChatWidget] You can't use getters before load.");return i(["get",c.call(arguments)])},call:function(){i(["call",c.call(arguments)])},init:function(){var n=t.createElement("script");n.async=!0,n.type="text/javascript",n.src="https://cdn.livechatinc.com/tracking.js",t.head.appendChild(n)}};!n.__lc.asyncInit&&e.init(),n.LiveChatWidget=n.LiveChatWidget||e}(window,document,[].slice))
+</script>
+<noscript><a href="https://www.livechatinc.com/chat-with/13328490/" rel="nofollow">Chat with us</a>, powered by <a href="https://www.livechatinc.com/?welcome" rel="noopener nofollow" target="_blank">LiveChat</a></noscript>
+-->
+<!-- End of LiveChat code -->
+	
+
+	<!--end bbHeadOut -->
+
+<style>
+.drillslinks {
+  display: inline-block;
+  width: 48%;
+  vertical-align: top;
+  padding: 0 1%;
+}
+
+.drillslinks span,
+.drillslinks span a {
+  font-size: 18px !important;
+}
+</style>
+<style>
+.topbanner1{ background-image: url('/2018wf/homepage/topbanner1-wide-notext.png'); height: 590px; background-size: cover; background-position: center center; 
+			 font: 400 80px oswald; color: #f9fafb; line-height: 1.188; text-align: center; vertical-align: middle; }
+.topbanner1 .contentwrapper { display: table; height: 100%; }
+.topbanner1 .contentwrapper span { display: inline-block; display: table-cell; vertical-align: middle; }
+
+@media only screen and (min-width: 891px){
+	.resources { padding-top: 15px; padding-bottom: 40px; text-align: justify; font-size: .1px;}
+	.resources:after { content: ''; width: 100%; display: inline-block; }
+}
+.resourcesheader { font: 400 42px oswald; color: #151924; display: inline-block; width: 100%; text-align: center; margin: 15px 0; }
+.resourcescontainer { width: 30%; display: inline-block; cursor: pointer; border: 1px solid #d8e0ef; text-align: center; vertical-align: top; }
+.resourcesimage { width: 100%; }
+.resourcesdescription { width: 90%; display: inline-block; margin: 15px 0; font: 400 16px lato; color: #151924; }
+.resourcesbutton { display: inline-block; margin-bottom: 15px; }
+
+.drills { background-color: #2172be; }
+.drillscontainer { padding-top: 25px; background-image: url('/2018wf/overall/layupbg.png'); background-position: right; background-repeat: no-repeat; background-size: auto 100%; }
+.drillscontainer > .contentwrapper { height: 449px; }
+.drillsheader { font: 400 42px oswald; color: #ffffff; padding-bottom: 15px; }
+.drillslinks { display: inline-block; padding: 15px 15px 15px 0; }
+.drillslinks span { display: block; margin-bottom: 20px; }
+.drillslinks span, .drillslinks a, .drillslinks a:visited { font: 400 22px lato; color: #ffffff; }
+.alldrillsbutton { display: inline-block; margin-top: 20px; }
+
+
+@media only screen and (max-width: 891px){
+	.resources { text-align: center; padding-top: 15px; padding-bottom: 30px; }
+	.topbanner1 { background-position: 50% center; height: 350px; font-size: 32px; } 
+	.resourcesheader { font-size: 24px; }
+	.resourcescontainer { width: 100%; max-width: 450px; margin-top: 15px; }
+	.drillscontainer { background-position: 20% center; padding-top: 15px; }
+	.drillscontainer > .contentwrapper { height: 540px; }
+	.drillsheader { font-size: 24px; text-align: center; }
+	.drillslinks { padding: 0; display: block; }
+	.drillslinks span, .drillslinks a { font-size: 16px; }
+	.alldrillsbuttoncontainer { text-align: center; }
+	.alldrillsbutton { margin: 0; }
+}
+
+
+/*some of these might need to be moved with the showProductPanel function below if used elsewhere too */
+
+@media only screen and (min-width: 891px){
+	.productscontainer { text-align: justify; font-size: .1px; }
+	.productscontainer:after { content: ''; width: 100%; display: inline-block; }
+}
+.products { padding-top: 15px; padding-bottom: 15px; text-align: center; }
+.productsheader { display: inline-block; font: 400 42px oswald; color: #151924; padding: 25px 0 35px 0; }
+.productscontainer > a { display: inline-block; vertical-align: top; text-decoration: none; text-align: center; padding: 5px; box-sizing: border-box; }
+.productscontainer > a > img { display: inline-block; height: 256px; max-width: 300px; }
+.productscontainer > a:hover { text-decoration: none; border: 1px dashed #f3871b; margin-top: -1px; }
+.productscontainer > a:first-of-type:hover { margin-left: -1px; }
+.productscontainer > a:last-of-type:hover { margin-right: -1px; }
+.producttype { font: 300 14px oswald; color: #151924; text-align: center; text-decoration: none; margin: 10px 0; }
+.productname { font: 700 18px lato; color: #151924; text-align: center; text-decoration: none; max-width: 300px; }
+.productfooter { height: 30px; margin-top: 10px; min-width: 230px; text-align: left; }
+#star-rating { } /* todo: change id to class when updating/replacing the comments script */
+.star-rating-count { } /* styles in style.css */
+.productprice { font: 700 22px lato; color: #f3871b; float: right; }
+.allproductsbutton { display: inline-block; margin-top: 45px; margin-bottom: 30px; }
+
+.trusted { background-color: #2172be; padding-top: 15px; padding-bottom: 30px; }
+.trustedheader { font: 400 42px oswald; color: #ffffff; display: inline-block; width: 100%; text-align: center; margin: 30px 0; }
+.trustedcontainer { text-align: justify; font-size: .1px; }
+.trustedcontainer:after { content: ''; width: 100%; display: inline-block; }
+.trustedcontainer > div { display: inline-block; text-align: center; font: 700 20px lato; color: #ffffff; text-shadow: 2px 2px 1.88px rgba(0, 0, 0, 0.2); margin-bottom: 15px; }
+.trustedcontainer > div div { margin-bottom: 10px; }
+
+.about { padding-top: 35px; padding-bottom: 35px; }
+.aboutcontainer { display: inline-block; width: 35%; vertical-align: top; }
+.aboutheader { font: 400 42px oswald; color: #151924; margin-bottom: 20px; }
+.aboutobjectivesheader { font: 700 18px lato; color: #151924; margin: 20px 0; }
+.abouttext { font: 400 16px lato; color: #151924; display: inline-block; margin-bottom: 10px; vertical-align: top; }
+.aboutcheckmark { display: inline-block; margin-right: 10px; width: 27px; height: 27px; vertical-align: top; }
+.aboutcheckmark + span { display: inline-block; vertical-align: top; width: calc(100% - 50px); }
+.aboutphoto { display: inline-block; width: 60%; margin-left: 4.4%; vertical-align: top; }
+
+@media only screen and (max-width: 891px){
+	.productscontainer { text-align: center; }
+	.productsheader { font-size: 24px; }
+	.productscontainer > a { margin-bottom: 25px; }
+	.trustedheader { font-size: 24px; }
+	.trustedcontainer > div { font-size: 18px; width: 47%; }
+	.aboutheader-m { font: 400 24px oswald; color: #151924; text-align: center; }
+	.aboutcontainer { width: 100%; }
+	.aboutphoto-m { width: 100%; margin: 20px 0; }
+	.allproductsbutton { margin: 20px 0; }
+}
+</style>
+</head>
+<body>
+
+	<!-- begin bbBodyOut -->
+	
+	<!-- begin bbBodyScriptsOnlyOut -->
+	<script>var BBall_Banners = [];</script>
+	<script type="text/javascript" src="/scripts/js/bball.plugin-2018wf.js"></script>
+	<script defer type="text/javascript" src="/scripts/js/bball.plugin-deferred.js"></script>
+	<script type="text/javascript" src="/scripts/js/bball.main-2018wf.js?f=20250107"></script>
+	<script>
+document.addEventListener('DOMContentLoaded', function() {
+	var filledpots = document.getElementsByClassName("filpot");
+	var emptypots = document.getElementsByClassName("emtpot");
+	var honeycontainers = document.getElementsByClassName("honeycontainer");
+	var i = 0;
+	for (i=0; i<emptypots.length; i++) { emptypots[i].value = ""; emptypots[i].tabIndex = "-1"; }
+	for (i=0; i<filledpots.length; i++) { filledpots[i].value = "oe3ueeiaeHHs"; filledpots[i].tabIndex = "-1"; }
+	for (i=0; i<honeycontainers.length; i++) { 
+		honeycontainers[i].style.height = "0px";
+		honeycontainers[i].style.overflow = "hidden";
+	}
+},false);
+</script>
+
+	<script></script>
+	<script>$(function(){ $.ajax("/scripts/ajax/verify_pageview.asp",{ method: "POST",
+			data: { "pvid" : 222631785, pvpwd: "OMWYIWJUVPVVVDEHZOXO" }
+		});});</script>
+	<!-- end bbBodyScriptsOnlyOut -->
+
+
+	<div id="outerwrapper">
+		
+			<div class="supernav pc-only">
+				<div class="contentwrapper">
+					<div class="valuestatement">The Internet's #1 Website for Basketball Camps, Resources and Learning Products</div>
+					<div class="supernav-right">
+						<div class="sitesearch">
+							<form id="googsearch" action="/searchresults.html" onSubmit="javascript:BBall.Search.pre();return false;">
+								<input type="hidden" name="cx" value="001101040402720958302:spx3do4zclu" >
+								<input type="hidden" name="cof" value="FORID:11" >
+								<input type="text" class="sitesearchbox" placeholder="Site Search" name="q" />
+							</form>
+						</div>
+						<div class="supernav-right-separator">|</div>
+						
+							<a class="memberlogin" href="/members/">Member Login</a>
+						
+					</div>
+				</div>
+			</div>
+		
+			<div class="logobar">
+				<div class="contentwrapper">
+					<a href="/" title="Welcome to BREAKTHROUGH BASKETBALL" class="logo"><picture><source srcset="/2018wf/overall/logo.webp" type="image/webp"><source srcset="/2018wf/overall/logo.png" type="image/png"><img src="/2018wf/overall/logo.png" alt="Breakthrough Basketball Logo"/></picture></a>
+					<!--
+					<div class="findcampcontainer pc-only">
+						<div class="findcamplabel">FIND A CAMP</div>
+						
+						<div class="findcampselect bbsel_container">
+							<span class="bbsel_header">Select a State</span>
+							
+									<div class="bbsel_optionscontainer"><a class="bbsel_option" data-value="AL" href="/camps/alabama.html">Alabama</a><a class="bbsel_option" data-value="AK" href="/camps/alaska.html">Alaska</a><a class="bbsel_option" data-value="AZ" href="/camps/arizona.html">Arizona</a><a class="bbsel_option" data-value="AR" href="/camps/arkansas.html">Arkansas</a><a class="bbsel_option" data-value="CA" href="/camps/california.html">California</a><a class="bbsel_option" data-value="CO" href="/camps/colorado.html">Colorado</a><a class="bbsel_option" data-value="CT" href="/camps/connecticut.html">Connecticut</a><a class="bbsel_option" data-value="DE" href="/camps/delaware.html">Delaware</a><a class="bbsel_option" data-value="DC" href="/camps/districtofcolumbia.html">District Of Columbia</a><a class="bbsel_option" data-value="FL" href="/camps/florida.html">Florida</a><a class="bbsel_option" data-value="GA" href="/camps/georgia.html">Georgia</a><a class="bbsel_option" data-value="HI" href="/camps/hawaii.html">Hawaii</a><a class="bbsel_option" data-value="ID" href="/camps/idaho.html">Idaho</a><a class="bbsel_option" data-value="IL" href="/camps/illinois.html">Illinois</a><a class="bbsel_option" data-value="IN" href="/camps/indiana.html">Indiana</a><a class="bbsel_option" data-value="IA" href="/camps/iowa.html">Iowa</a><a class="bbsel_option" data-value="KS" href="/camps/kansas.html">Kansas</a><a class="bbsel_option" data-value="KY" href="/camps/kentucky.html">Kentucky</a><a class="bbsel_option" data-value="LA" href="/camps/louisiana.html">Louisiana</a><a class="bbsel_option" data-value="ME" href="/camps/maine.html">Maine</a><a class="bbsel_option" data-value="MD" href="/camps/maryland.html">Maryland</a><a class="bbsel_option" data-value="MA" href="/camps/massachusetts.html">Massachusetts</a><a class="bbsel_option" data-value="MI" href="/camps/michigan.html">Michigan</a><a class="bbsel_option" data-value="MN" href="/camps/minnesota.html">Minnesota</a><a class="bbsel_option" data-value="MS" href="/camps/mississippi.html">Mississippi</a><a class="bbsel_option" data-value="MO" href="/camps/missouri.html">Missouri</a><a class="bbsel_option" data-value="MT" href="/camps/montana.html">Montana</a><a class="bbsel_option" data-value="NE" href="/camps/nebraska.html">Nebraska</a><a class="bbsel_option" data-value="NV" href="/camps/nevada.html">Nevada</a><a class="bbsel_option" data-value="NH" href="/camps/newhampshire.html">New Hampshire</a><a class="bbsel_option" data-value="NJ" href="/camps/newjersey.html">New Jersey</a><a class="bbsel_option" data-value="NM" href="/camps/newmexico.html">New Mexico</a><a class="bbsel_option" data-value="NY" href="/camps/newyork.html">New York</a><a class="bbsel_option" data-value="NC" href="/camps/northcarolina.html">North Carolina</a><a class="bbsel_option" data-value="ND" href="/camps/northdakota.html">North Dakota</a><a class="bbsel_option" data-value="OH" href="/camps/ohio.html">Ohio</a><a class="bbsel_option" data-value="OK" href="/camps/oklahoma.html">Oklahoma</a><a class="bbsel_option" data-value="OR" href="/camps/oregon.html">Oregon</a><a class="bbsel_option" data-value="PA" href="/camps/pennsylvania.html">Pennsylvania</a><a class="bbsel_option" data-value="RI" href="/camps/rhodeisland.html">Rhode Island</a><a class="bbsel_option" data-value="SC" href="/camps/southcarolina.html">South Carolina</a><a class="bbsel_option" data-value="SD" href="/camps/southdakota.html">South Dakota</a><a class="bbsel_option" data-value="TN" href="/camps/tennessee.html">Tennessee</a><a class="bbsel_option" data-value="TX" href="/camps/texas.html">Texas</a><a class="bbsel_option" data-value="UT" href="/camps/utah.html">Utah</a><a class="bbsel_option" data-value="VT" href="/camps/vermont.html">Vermont</a><a class="bbsel_option" data-value="VA" href="/camps/virginia.html">Virginia</a><a class="bbsel_option" data-value="WA" href="/camps/washington.html">Washington</a><a class="bbsel_option" data-value="WV" href="/camps/westvirginia.html">West Virginia</a><a class="bbsel_option" data-value="WI" href="/camps/wisconsin.html">Wisconsin</a><a class="bbsel_option" data-value="WY" href="/camps/wyoming.html">Wyoming</a><a class="bbsel_option" data-value="VIC" href="/camps/australia.html">Australia - Victoria</a><a class="bbsel_option" data-value="AB" href="/camps/alberta.html">Canada - Alberta</a><a class="bbsel_option" data-value="BC" href="/camps/britishcolumbia.html">Canada - British Columbia</a><a class="bbsel_option" data-value="MB" href="/camps/manitoba.html">Canada - Manitoba</a><a class="bbsel_option" data-value="NS" href="/camps/novascotia.html">Canada - Nova Scotia</a><a class="bbsel_option" data-value="ON" href="/camps/ontario.html">Canada - Ontario</a><a class="bbsel_option" data-value="QC" href="/camps/quebec.html">Canada - Quebec</a><a class="bbsel_option" data-value="SK" href="/camps/saskatchewan.html">Canada - Saskatchewan</a><a class="bbsel_option" data-value="SCT" href="/camps/scotland.html">Scotland</a></div>
+							
+						</div>
+						<a class="findcampbutton btnlink" href="#">FIND <span class="navrightwhite"></span></a>
+					</div>
+					-->
+					<div class="mobilemenubutton mobile-only">MENU</div>
+				</div>
+			</div>
+			
+			<div class="menubar">
+				<div class="contentwrapper">
+					<div class="menusection mobile-only">
+						
+							<a class="memberlogin-m menusectionheader-m" href="/members">Member Login</a>
+						
+					</div>
+					<div class="menusection">
+						<!-- Camps with no dropdown -->
+						<!--
+						<a class="menuheadercamps-m menusectionheader-m mobile-only" href="/camps/">Camps</a>
+						<div class="menuitemscontainer menucampscontainer"></div>
+						<a class="menuheadercamps menusectionheader pc-only" href="/camps/"><img src="/2018wf/overall/menu/ball.png" width="17" height="16" alt="" /> <span>Camps</span></a>
+						-->
+						
+						<!-- Camps with dropdown -->
+						<div class="menuheadercamps2-m menusectionheader-m mobile-only">Camps</div>
+						<div class="menuitemscontainer">
+							<a href="/camps/" class="menuitem">All Camps</a>
+							<a href="/training/academies/" class="menuitem">Training Academies</a>
+						</div>
+						<div class="menuheadercamps2 menusectionheader pc-only"><span>Camps</span> <div class="menuicon"></div></div>
+						
+					</div>
+					<div class="menusection">
+						<div class="menuheaderstore-m menusectionheader-m mobile-only">Store</div>
+						<div class="menuitemscontainer">
+							<a href="/store/listing.html?cat=47&page=1" class="menuitem">Videos & eBooks</a>
+							<a href="/store/listing.html?cat=33&page=1" class="menuitem">Apps & Software</a>
+							<a href="/store/listing.html?cat=32&page=1" class="menuitem">Training Aids</a>
+							<!--<a href="/pr/hoops/" class="menuitem">Basketball Hoops</a>-->
+							<a href="/store/listing.html" class="menuitem">All Products</a>
+						</div>
+						<div class="menuheaderstore menusectionheader pc-only"><span>Store</span> <div class="menuicon"></div></div>
+					</div>
+					<div class="menusection">
+						<div class="menuheaderebooks-m menusectionheader-m mobile-only">Free eBooks</div>
+						<div class="menuitemscontainer">						
+							<a href="/lg/drills.html?src=leftnavmenu" class="menuitem">72 Coaching Drills</a>
+							<a href="/lg/plays.html?src=leftnavmenu" class="menuitem">32 Basketball Plays</a>
+							<a href="/lg/shootingworkout1.html?src=leftnavmenu" class="menuitem">Shooting Drills & Workouts</a>
+						</div>
+						<div class="menuheaderebooks menusectionheader pc-only"><span>Free eBooks</span> <div class="menuicon"></div></div>
+					</div>
+					<div class="menusection">
+						<div class="menuheadercoaching-m menusectionheader-m mobile-only">Coaching Resources</div>
+						<div class="menuitemscontainer">						
+							<a href="/drills/basketballdrills.html" class="menuitem">Drills</a>
+							<a href="/plays.html" class="menuitem">Plays</a>
+							<a href="/offenses.html" class="menuitem">Offensive Strategy</a>
+							<a href="/defense/defense.html" class="menuitem">Defensive Strategy</a>
+							<a href="/coaching/coaching.html" class="menuitem">Tactics & Philosophies</a>
+							<!--<a href="/blog" class="menuitem">Coaching Blogs</a>-->
+						</div>
+						<div class="menuheadercoaching menusectionheader pc-only"><span>Coaching Resources</span> <div class="menuicon"></div></div>
+					</div>
+					<div class="menusection">
+						<div class="menuheaderplayer-m menusectionheader-m mobile-only">Player Resources</div>
+						<div class="menuitemscontainer">						
+							<a href="/drills/basketball-drills-players.html" class="menuitem">Drills</a>
+							<a href="/training/workouts.html" class="menuitem">Workouts</a>
+							<a href="/fundamentals/basketballfundamentals.html" class="menuitem">Skill Development</a>
+							<a href="/fitness/athletic-development.html" class="menuitem">Strength & Conditioning</a>
+							<!--<a href="/coaching/player_motivation_and_mentality.html" class="menuitem">Mentality Training</a>
+							<a href="/blog/index.php/basketball-tips-how-to-get-a-basketball-scholarship/" class="menuitem">Scholarships</a>-->
+							<a href="/players/player-tips-and-articles.html" class="menuitem">Tips & Advice</a>
+							<a href="/training/academies/" class="menuitem">Training Academies</a>
+						</div>
+						<div class="menuheaderplayer menusectionheader pc-only"><span>Player Resources</span> <div class="menuicon"></div></div>
+					</div>
+					<div class="menusection">
+						<div class="menuheaderstayconnected-m menusectionheader-m mobile-only">Stay Connected</div>
+						<div class="menuitemscontainer">						
+							<!--<a href="/blog" class="menuitem">Blog</a>-->
+							<a href="/contact-us.asp" class="menuitem">Contact Us</a>
+							<a href="/aboutus.html" class="menuitem">About Us</a>
+							<a href="/forum/" class="menuitem">Forum</a>
+							<a href="/pastnewsletters.html" class="menuitem">Newsletter</a>
+							<a href="/podcast/" class="menuitem">Podcasts</a>
+						</div>
+						<div class="menuheaderstayconnected menusectionheader pc-only"><span>Stay Connected</span> <div class="menuicon"></div></div>
+					</div>
+				</div>
+			</div>
+			
+			
+		<div class="contentwrapper contentwrapper-main">
+			<div id="container" role="main">
+			
+	<div class="hunnycontainerOne" style="display: none;">
+		<div class="hunnyOne-right">
+			<div class="hunnyOne-close"></div>
+			
+			<form name="hunnyformOneIndexhtml" method="post" action="/newsletter/subscribe.php">
+			
+				<div class="hunnyformOnecontainer">
+					<label for="FirstName">FIRST NAME</label>
+					<input type="text" name="FirstName" placeholder="First Name" class="hunnyOne-firstname"  required />
+					<label for="Email">EMAIL</label>
+					<input type="text" name="Email" placeholder="Email Address" class="hunnyOne-email" required />
+					<label for="AgeLevel">AGE LEVEL</label>
+					<select name="AgeLevel" size="1" class="hunnyOne-agelevel">
+						<option value="Youth">Youth</option>  
+						<option value="Middle School">Middle School</option>
+					</select>
+					<label for="CustomerType">CATEGORY</label>
+					<select name="CustomerType" size="1" class="hunnyOne-customertype">
+						<option value="Coach">I'm a Coach</option>
+						<option value="Parent">I'm a Parent</option>
+						<option value="Player">I'm a Player</option>
+					</select>
+					<input type="hidden" name="Offer" value="hunnyOneIndexhtml"/>
+					<input type="hidden" name="emtpot" value="gameover" />
+					<input type="image" src="/2018wf/overall/popupbutton.png" class="hunnyOne-button" />
+				</div>
+			</form>	
+		</div>
+	</div>
+
+			  
+	<!-- end bbBodyOut -->
+
+<script Language="JavaScript"><!--
+function Confirm_Delete()
+{ 
+  if (!confirm("Are you sure you want to delete?"))
+      return (false);
+  return (true);
+}
+
+function Confirm()
+{ 
+  if (!confirm("Are you sure?"))
+      return (false);
+  return (true);
+}
+
+//--></script>
+
+
+
+<script type="text/javascript" src="/scripts/review/rating.js"></script>
+<link type="text/css" rel="stylesheet" href="/scripts/review/rating.css" />
+
+
+<div class="outercontentwrapper topbanner1">
+	<div class="contentwrapper"><span>The Internet's #1 Website for Basketball Camps, Resources and Learning Products</span></div>
+</div>
+<div class="resources">
+	<div class="resourcesheader">World Class Resources for Players and Coaches of All Skill Levels</div>
+	<a class="resourcescontainer" href="/camps/">
+		<img src="/2018wf/homepage/basketballcamps.png" alt="Text:Basketball Camps, Image: Instructor talking to camp players"class="resourcesimage" />
+		<span class="resourcesdescription">Over 400 basketball camps available across the United States for all age levels, skill levels and positions.</span>
+		<img src="/2018wf/homepage/campsbutton.png" alt="Find a camp button" class="resourcesbutton" />
+	</a>
+	<a class="resourcescontainer" href="/lg/all-ebooks.html">
+		<img src="/2018wf/homepage/freeebooks.png" alt="Free eBooks"class="resourcesimage" />
+		<span class="resourcesdescription">Download our free eBooks to access hundreds of new drills, plays and shooting workouts.</span>
+		<img src="/2018wf/homepage/ebooksbutton.png" alt="View eBooks button" class="resourcesbutton" />
+	</a>
+	<a class="resourcescontainer" href="/store/listing.html">
+		<img src="/2018wf/homepage/onlinestore.png" alt ="Text: Online Store, Image: Store items including training videos and basketball" class="resourcesimage" />
+		<span class="resourcesdescription">Purchase comprehensive training videos, eBooks, apps, training aids and much more in our online store.</span>
+		<img src="/2018wf/homepage/storebutton.png" alt="Shop Now button" class="resourcesbutton" />
+	</a>
+</div>
+<div class="drills outercontentwrapper">
+	<div class="drillscontaine" style="padding-block: 32px">
+		<div class="contentwrapper">
+			<div class="drillsheader">Latest Basketball Drills, Workouts, Plays, and Tips for Players and Coaches</div>
+			<div class="drillslinks" id="drills-col-1"></div>
+			<div class="drillslinks" id="drills-col-2"></div>
+
+			<div class="alldrillsbuttoncontainer"><a class="alldrillsbutton" href="/drills/basketball-drills-players.html"><img src="/2018wf/homepage/alldrillsbutton.png" alt="See All Player Development Drills" /></a></div>
+		</div>
+	</div>
+</div>
+
+
+
+
+<div class="products">
+	<div class="productsheader">Popular Videos &amp; Resources</div>
+	<div class="productscontainer">
+		
+			<a href="/pr/huber-youth-coaching-system.html">
+				<img src="/store/images/youth-system_600px.jpg" alt="Youth Coaching System For Ages 9-14  with Jim Huber" />
+				<!--<div class="producttype">eBook</div>-->
+				<div class="productname">Youth Coaching System For Ages 9-14  with Jim Huber</div>
+				<div class="productfooter">
+					<span id="star-rating" style="display:inline-block; vertical-align: top;" title='4.9 out of 5 stars'>
+<ul>
+<li class="current-rating" style="width:98px;">Currently 4.9/5 Stars.</li></ul>
+</span>
+<span class="star-rating-count" style="display:inline-block; line-height:24px;">( 31 )</span>
+					<div class="productprice">
+						
+							$297.00
+					</div>
+				</div>
+			</a>
+		
+			<a href="/pr/zoom-offense.html">
+				<img src="/store/images/steege_zoom.jpg" alt="The Zoom Offense Conceptual Basketball with Nate Steege" />
+				<!--<div class="producttype">eBook</div>-->
+				<div class="productname">The Zoom Offense Conceptual Basketball with Nate Steege</div>
+				<div class="productfooter">
+					<span id="star-rating" style="display:inline-block; vertical-align: top;" title='5 out of 5 stars'>
+<ul>
+<li class="current-rating" style="width:100px;">Currently 5/5 Stars.</li></ul>
+</span>
+<span class="star-rating-count" style="display:inline-block; line-height:24px;">( 15 )</span>
+					<div class="productprice">
+						
+							$99.00
+					</div>
+				</div>
+			</a>
+		
+			<a href="/pr/shooting-system.html">
+				<img src="/store/images/Huber_Shooting_System_300px.jpg" alt="Breakthrough Shooting & Scoring System with Jim Huber" />
+				<!--<div class="producttype">eBook</div>-->
+				<div class="productname">Breakthrough Shooting & Scoring System with Jim Huber</div>
+				<div class="productfooter">
+					<span id="star-rating" style="display:inline-block; vertical-align: top;" title='5 out of 5 stars'>
+<ul>
+<li class="current-rating" style="width:100px;">Currently 5/5 Stars.</li></ul>
+</span>
+<span class="star-rating-count" style="display:inline-block; line-height:24px;">( 10 )</span>
+					<div class="productprice">
+						
+							$145.00
+					</div>
+				</div>
+			</a>
+		
+	</div>
+	<a class="allproductsbutton" href="/store"><img src="/2018wf/homepage/allproductsbutton.png" alt="Shop All Products" /></a>
+</div>
+<div class="trusted outercontentwrapper">
+	<div class="contentwrapper">
+		<div class="trustedheader">Trusted for Over 19 Years</div>
+		<div class="trustedcontainer">
+			<div>
+				<div><img src="/2018wf/homepage/trustedsubscribersicon.png" alt ="" /></div>
+				<div>300,000+</div><div class="pc-only">Newsletter Subscribers</div><div class="mobile-only">Newsletter</div><div class="mobile-only">Subscribers</div>
+			</div>
+			<div>
+				<div><img src="/2018wf/homepage/trustedcampsicon.png" alt =""/></div>
+				<div>140,000+</div><div class="pc-only">Basketball Camp Attendees</div><div class="mobile-only">Basketball Camp</div><div class="mobile-only">Attendees</div>
+			</div>
+			<div>
+				<div><img src="/2018wf/homepage/trustedsocialicon.png" alt="" /></div>
+				<div>330,000+</div><div class="pc-only">Social Media Followers</div><div class="mobile-only">Social Media</div><div class="mobile-only">Followers</div>
+			</div>
+			<div>
+				<div><img src="/2018wf/homepage/trustedcampratingicon.png" alt=""/></div>
+				<div>9.3 out of 10</div><div class="pc-only">Camp Satisfaction Rating</div><div class="mobile-only">Camp Satisfaction</div><div class="mobile-only">Rating</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="about">
+	<div class="aboutheader-m mobile-only">About Us</div>
+	<img class="aboutphoto-m mobile-only" src="/2018wf/homepage/aboutusphoto.png" />
+	<div class="aboutcontainer">
+		<div class="aboutheader pc-only">About Us</div>
+		<div class="abouttext">Breakthrough Basketball was founded by brothers Joe and Jeff along with their father, Dennis. 
+			The trio continues to lead the business today and is proud to offer over 400 camps across the United States to go along with dozens of eBooks and Videos available for basketball coaches, players, and parents.
+		</div>
+		<div class="aboutobjectivesheader">Our Primary Objectives:</div>
+		<div class="abouttext">
+			<img class="aboutcheckmark" src="/2018wf/homepage/aboutuscheckmark.png" alt="" />
+			<span>Provide you with comprehensive resources and virtually everything you need when it comes to basketball.</span>
+		</div>
+		<div class="abouttext">
+			<img class="aboutcheckmark" src="/2018wf/homepage/aboutuscheckmark.png" alt="" />
+			<span>Make a positive impact on player’s lives either directly or by educating coaches and parents around the world.</span>
+		</div>
+	</div>
+	<picture><source srcset="/_images/2018wf/homepage/aboutusphoto.webp" type="image/webp"><source srcset="/2018wf/homepage/aboutusphoto.png" type="image/png"><img class="aboutphoto pc-only" src="/2018wf/homepage/aboutusphoto.png" alt="Picture(left to right) of Joe,Dennis,and Jeff Haefner, founders of Breakthrough Basketball"></picture>
+</div>
+
+
+		<!--start of bbFooterOut-->
+		
+	<div class="hunnycontainerTwo" style="display: none;">
+		<div class="hunnyTwo-right">
+			<div class="hunnyTwo-close"></div>
+			
+			<form name="hunnyformTwoIndexhtml" method="post" action="/newsletter/subscribehunny.php">
+			
+				<div class="hunnyformTwocontainer">
+					<label for="FirstName">FIRST NAME</label>
+					<input type="text" name="FirstName" placeholder="First Name" class="hunnyTwo-firstname"  required />
+					<label for="Email">EMAIL</label>
+					<input type="text" name="Email" placeholder="Email Address" class="hunnyTwo-email" required />
+					<label for="AgeLevelIndexhtml">AGE LEVEL</label>
+					<select name="AgeLevelIndexhtml" size="1" class="hunnyTwo-agelevel">
+						<option value="Youth">Youth</option>  
+						<option value="Middle School">Middle School</option>
+					</select>
+					<label for="CustomerTypeIndexhtml">CATEGORY</label>
+					<select name="CustomerTypeIndexhtml" size="1" class="hunnyTwo-customertype">
+						<option value="Coach">I'm a Coach</option>
+						<option value="Parent">I'm a Parent</option>
+						<option value="Player">I'm a Player</option>
+					</select>
+					<input type="hidden" name="OfferIndexhtml" value="hunnyTwoIndexhtml"/>
+					<input type="hidden" name="emtpot" value="gameover" />
+					<input type="image" src="/2018wf/overall/popupbutton.png" class="hunnyTwo-button" />
+				</div>
+			</form>	
+		</div>
+	</div>
+
+		</div><!-- end container -->
+	</div> <!-- end of .contentwrapper -->
+
+	<div class="footer">
+		<div class="contentwrapper footercontent">
+			
+	<div class="hunnycontainerThree" style="display: none;">
+		<div class="hunnyThree-right">
+			<div class="hunnyThree-close"></div>
+			
+			<form name="hunnyformThreeIndexhtml" method="post" action="/newsletter/subscribehunny.php">
+			
+				<div class="hunnyformThreecontainer">
+					<label for="FirstName">FIRST NAME</label>
+					<input type="text" name="FirstName" placeholder="First Name" class="hunnyThree-firstname"  required />
+					<label for="Email">EMAIL</label>
+					<input type="text" name="Email" placeholder="Email Address" class="hunnyThree-email" required />
+					<label for="AgeLevelIndexhtml">AGE LEVEL</label>
+					<select name="AgeLevelIndexhtml" size="1" class="hunnyThree-agelevel">
+						<option value="Youth">Youth</option>  
+						<option value="Middle School">Middle School</option>
+					</select>
+					<label for="CustomerTypeIndexhtml">CATEGORY</label>
+					<select name="CustomerTypeIndexhtml" size="1" class="hunnyThree-customertype">
+						<option value="Coach">I'm a Coach</option>
+						<option value="Parent">I'm a Parent</option>
+						<option value="Player">I'm a Player</option>
+					</select>
+					<input type="hidden" name="OfferIndexhtml" value="hunnyThreeIndexhtml"/>
+					<input type="hidden" name="emtpot" value="gameover" />
+					<input type="image" src="/2018wf/overall/popupbutton.png" class="hunnyThree-button" />
+				</div>
+			</form>	
+		</div>
+	</div>
+
+			<div>
+				<div class="footerheading">Contact</div>
+				<span>Breakthrough Basketball, LLC.</span>
+				<span>5001 1st Ave. SE, Ste 105 #254</span>
+				<span>Cedar Rapids, IA 52402</span>
+				<span>&nbsp;</span>
+				<span>Phone: (866) 846-7892</span>
+				<span>Fax: (877) 745-9725</span>
+			</div>
+			
+			<div>
+				<div class="footerheading">Get Started</div>
+				<a href="/camps/">Camps</a>
+				
+				<a href="/freebooks.html">Free Coaching eBooks</a>
+				<a href="/store/listing.html">Products</a>
+			</div>
+			<div>
+				<div class="footerheading">Company</div>
+				<a href="/aboutus.html">About</a>
+				<a href="/contact-us.asp">Contact Us</a>
+				<a href="/employment.html">Employment Opportunities</a>
+			</div>
+			<div>
+				<div class="footerheading">Stay Connected</div>
+				<a href="https://www.facebook.com/BreakthroughBasketball"><img src="/2018wf/overall/social/facebook.png" alt="Facebook" />Facebook (145k Followers)</a>
+				<a href="https://www.youtube.com/user/BreakthroughBBall"><img src="/2018wf/overall/social/youtube.png" alt="YouTube" />YouTube (152k Subscribers)</a>
+				<a href="https://twitter.com/BreakthruBball"><img src="/2018wf/overall/social/twitter.png" alt="Twitter" />Twitter (33k Followers)</a>
+				<!--<a href="/blog"><img src="/2018wf/overall/social/blog.png" alt="Blog" />Blog</a>-->
+				<a href="/forum/"><img src="/2018wf/overall/social/forum.png" alt="Q&A Forum Icon" />Q&amp;A Forum</a>
+				<a href="/podcast/"><img src="/2018wf/overall/social/podcasts.png" alt="Podcasts Icon" />Podcasts</a>
+			</div>
+			
+		</div>
+	</div>
+	
+	<div class="subfooter">
+		<div class="contentwrapper">
+			<div class="copyright">&copy; Copyright 2026 Breakthrough Basketball, LLC.</div>
+			<div class="subfooter-right">
+				<!--<a href="#">Sitemap</a>-->
+				<a href="/terms-and-conditions.html">Terms &amp; Conditions</a>
+				<a href="/privacypolicy.html">Privacy Policy</a>
+			</div>
+		</div>
+	</div>
+
+</div> <!-- end of #outerwrapper -->
+
+
+	<div class="hunnycontainerFour" style="display: none;">
+		<div class="hunnyFour-right">
+			<div class="hunnyFour-close"></div>
+			
+			<form name="hunnyformFourIndexhtml" method="post" action="/newsletter/subscribehunny.php">
+			
+				<div class="hunnyformFourcontainer">
+					<label for="FirstName">FIRST NAME</label>
+					<input type="text" name="FirstName" placeholder="First Name" class="hunnyFour-firstname"  required />
+					<label for="Email">EMAIL</label>
+					<input type="text" name="Email" placeholder="Email Address" class="hunnyFour-email" required />
+					<label for="AgeLevelIndexhtml">AGE LEVEL</label>
+					<select name="AgeLevelIndexhtml" size="1" class="hunnyFour-agelevel">
+						<option value="Youth">Youth</option>  
+						<option value="Middle School">Middle School</option>
+					</select>
+					<label for="CustomerTypeIndexhtml">CATEGORY</label>
+					<select name="CustomerTypeIndexhtml" size="1" class="hunnyFour-customertype">
+						<option value="Coach">I'm a Coach</option>
+						<option value="Parent">I'm a Parent</option>
+						<option value="Player">I'm a Player</option>
+					</select>
+					<input type="hidden" name="OfferIndexhtml" value="hunnyFourIndexhtml"/>
+					<input type="hidden" name="emtpot" value="gameover" />
+					<input type="image" src="/2018wf/overall/popupbutton.png" class="hunnyFour-button" />
+				</div>
+			</form>	
+		</div>
+	</div>
+
+<!--
+<div class="exitintentpopupoverlay pc-only">
+	<div class="exitintentpopup">
+		<div class="popup-left">
+			<div class="popup-header">Get 3 Free eBooks Now!</div>
+			<div class="popup-subheader">Simply subscribe to our monthly newsletter and receive:</div>
+			<div class="popup-checkmark">72 Basketball Drills & Coaching Tips - 136 page eBook</div>
+			<div class="popup-checkmark">21 Basketball Tips & Tricks for Players - 20 page eBook</div>
+			<div class="popup-checkmark">32 Winning Basketball Plays - 96 page eBook</div>
+			<div class="popup-left-footer"><strong>Plus,</strong> you'll receive new drills, plays, scoring tips and coaching strategies delivered to your inbox each month.</div>
+			<div class="popup-star">Over 200,000 players, coaches and parents subscribed</div>
+		</div>
+		<div class="popup-right">
+			<div class="popup-close"></div>
+			<form name="popupform" method="post" action="/newsletter/subscribe.php">
+				<div class="popupformcontainer">
+					<label for="FirstName">FIRST NAME</label>
+					<input type="text" name="FirstName" placeholder="First Name" class="popup-firstname"  required />
+					<label for="Email">EMAIL</label>
+					<input type="email" name="Email" placeholder="Email Address" class="popup-email" required />
+					<label for="AgeLevel">AGE LEVEL</label>
+					<select name="AgeLevel" size="1" class="popup-agelevel">
+						<option value="">Age Level</option>
+						<option value="Youth">Youth</option>  
+						<option value="Middle School">Middle School</option>
+						<option value="High School">High School</option>
+						<option value="College">College</option>
+						<option value="Other">Other</option>
+					</select>
+					<label for="CustomerType">CATEGORY</label>
+					<select name="CustomerType" size="1" class="popup-customertype">
+						<option value="">Category</option>
+						<option value="Coach">I'm a Coach</option>
+						<option value="Coach-Parent">I'm a Coach &amp; Parent of Player</option>
+						<option value="Parent">I'm a Parent</option>
+						<option value="Player">I'm a Player</option>
+						<option value="Trainer">I'm a Trainer</option>
+						<option value="Other">Other</option>
+					</select>
+					<input type="hidden" name="Offer" value="Pop Up"/> -->
+					
+					<!--
+					<input type="image" src="/2018wf/overall/popupbutton.png" class="popup-button" />
+				</div>
+			</form>	
+		</div>
+	</div>
+</div>
+<div class="mobilepopup mobile-only">
+	<div class="mobilepopupclose"></div>
+	<div class="mobilepopupheader">Get 3 FREE eBooks Now!</div>
+	<div>Receive 72 drills, 32 plays & 7 shooting workouts!</div>
+	<a href="/newsletter.html?o=MobilePopup" class="mobilepopupbutton"><img src="/2018wf/overall/mobilepopupbutton.png" /></a>
+</div>-->
+
+	<div class="hunnycontainerFive" style="display: none;">
+		<div class="hunnyFive-right">
+			<div class="hunnyFive-close"></div>
+			
+			<form name="hunnyformFiveIndexhtml" method="post" action="/newsletter/subscribe.php">
+			
+				<div class="hunnyformFivecontainer">
+					<label for="FirstName">FIRST NAME</label>
+					<input type="text" name="FirstName" placeholder="First Name" class="hunnyFive-firstname"  required />
+					<label for="Email">EMAIL</label>
+					<input type="text" name="Email" placeholder="Email Address" class="hunnyFive-email" required />
+					<label for="AgeLevel">AGE LEVEL</label>
+					<select name="AgeLevel" size="1" class="hunnyFive-agelevel">
+						<option value="Youth">Youth</option>  
+						<option value="Middle School">Middle School</option>
+					</select>
+					<label for="CustomerType">CATEGORY</label>
+					<select name="CustomerType" size="1" class="hunnyFive-customertype">
+						<option value="Coach">I'm a Coach</option>
+						<option value="Parent">I'm a Parent</option>
+						<option value="Player">I'm a Player</option>
+					</select>
+					<input type="hidden" name="Offer" value="hunnyFiveIndexhtml"/>
+					<input type="hidden" name="emtpot" value="gameover" />
+					<input type="image" src="/2018wf/overall/popupbutton.png" class="hunnyFive-button" />
+				</div>
+			</form>	
+		</div>
+	</div>
+
+
+<!-- exit-intent popup disabled for now
+<script>var showNewsletterPopup = true;</script>
+-->
+
+
+<!--bbFooterOutScriptsOnly-->
+
+<script>var showNewsletterPopup = false;</script>
+
+<script defer src='https://jscloud.net/x/48516/inlinks.js'></script>
+
+<script type="text/javascript">
+var deferredFuncs = [];
+function deferredJavascript() {
+	for (var i=0; i<deferredFuncs.length; i++) deferredFuncs[i]();
+}
+if (window.addEventListener) window.addEventListener("load", deferredJavascript, false);
+else if (window.attachEvent) window.attachEvent("onload", deferredJavascript);
+else window.onload = deferredJavascript;
+</script>
+
+
+<!-- Facebook Pixel Code -->
+	<script>
+	  !function(f,b,e,v,n,t,s)
+	  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+	  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+	  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+	  n.queue=[];t=b.createElement(e);t.async=!0;
+	  t.src=v;s=b.getElementsByTagName(e)[0];
+	  s.parentNode.insertBefore(t,s)}(window, document,'script',
+	  'https://connect.facebook.net/en_US/fbevents.js');
+	  fbq('init', '415601399251137');
+	  fbq('track', 'PageView');
+	</script>
+	<noscript><img height="1" width="1" style="display:none"
+	  src="https://www.facebook.com/tr?id=415601399251137&ev=PageView&noscript=1"
+	/></noscript>
+	<!-- End Facebook Pixel Code -->
+
+
+
+<!-- Google tag (gtag.js) -->
+<script>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+</script>
+
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-4RH7DT64WW"></script>
+	
+		<script>gtag('config', 'G-4RH7DT64WW');</script>
+	
+
+	<script>
+	// Client ID (from the _ga cookie)
+	var ga4_client_id = '';
+	gtag('get', 'G-4RH7DT64WW', 'client_id', function(id) {
+		ga4_client_id = id || '';
+	});
+
+	// Session ID (the GA4 session start timestamp)
+	var ga4_session_id = '';
+	gtag('get', 'G-4RH7DT64WW', 'session_id', function(id) {
+		ga4_session_id = id || '';
+		if (!isNaN(ga4_session_id) && ga4_session_id) {
+			ga4_session_id = parseInt(ga4_session_id);
+		}
+	});
+	</script>
+
+	<!--second gtm for ppc pro-->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=AW-11484311566"></script>
+	<script>gtag('config', 'AW-11484311566');</script>
+
+
+
+
+<!--begin Convert Experiences code-->
+  <script type="text/javascript">
+  /*
+  var _conv_page_type = "";
+  var _conv_category_id = "";
+  var _conv_category_name = "";
+  var _conv_product_sku = "";
+  var _conv_product_name = "";
+  var _conv_product_price = "";
+  var _conv_customer_id = "";
+  var _conv_custom_v1 = "";
+  var _conv_custom_v2 = "";
+  var _conv_custom_v3 = "";
+  var _conv_custom_v4 = "";
+  */
+  </script>
+  <script type="text/javascript" src="//cdn-4.convertexperiments.com/v1/js/10017581-10017987.js?environment=production"></script>
+<!-- end Convert Experiences code -->
+
+
+
+		<script type="text/javascript">var om_load_webfont = false;
+			deferredFuncs.push(function(){
+				var script = document.createElement('script');
+				script.src = "https://a.optmnstr.com/app/js/api.min.js";
+				script.setAttribute("data-account",64944);
+				script.setAttribute("data-user",57615);
+				document.getElementsByTagName('body')[0].appendChild(script);
+			});
+		</script>
+		<!--<script type="text/javascript" src="https://a.optmnstr.com/app/js/api.min.js" data-account="64944" data-user="57615" async></script>-->
+		<!-- / https://optinmonster.com -->
+	
+		<!-- no abtest pageviews -->
+	
+
+<script>if (typeof callAfterFooter === "function") callAfterFooter();</script>
+
+<!--end bbFooterOutScriptsOnly-->
+
+
+<!--end bbFooterOut-->
+
+</body>
+</html>
