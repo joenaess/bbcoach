@@ -48,11 +48,8 @@ def get_team_aggregates(players_df, team_id, season):
             # Height (index 2 or 1) usually contains 'm'.
 
             # offset = 0 # Unused
-            if "m" in str(raw[1]):  # Standard: 0:#, 1:Name, 2:Height
-                # This seems unlikely for 'td' scrape if name is in 'a' inside 'td'.
-                # Scraper gets all 'td'.
-                # Let's assume indices from inspection:
-                # Headers found: ['#', 'Player', 'Height', 'Age', 'GP', 'MIN', 'PTS', ...]
+            # Removing strict check for "m" in height as it fails for players with missing height ('-')
+            if len(raw) > 18:  # Standard row length check (needs up to index 18)
                 # If scraper gets TDs, Name is likely first TD.
                 # Let's check previous sample: ['Keaston Willis' '1m90' '24' '18.4' ...]
                 # Name (0), Height (1), Age (2), PTS/MIN? (3)
@@ -106,7 +103,7 @@ def get_team_aggregates(players_df, team_id, season):
                 # '87%' (Index 11) -> FT%?
 
                 p_stats = {
-                    "name": row["name"],
+                    "name": row["name"].strip(),
                     "ppg": parse_stat(raw[3]),
                     "rpg": parse_stat(raw[4]),
                     "apg": parse_stat(raw[5]),
@@ -122,7 +119,7 @@ def get_team_aggregates(players_df, team_id, season):
                 # Fallback
                 parsed_players.append(
                     {
-                        "name": row["name"],
+                        "name": row["name"].strip(),
                         "ppg": 0,
                         "rpg": 0,
                         "apg": 0,

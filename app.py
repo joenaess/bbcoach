@@ -224,13 +224,21 @@ with st.sidebar:
 
         try:
             # Run the scraper as a subprocess and read stdout
+            # Run the scraper with unbuffered output to ensure progress updates
+            # Also set PYTHONPATH to include src
+            import os
+
+            env = os.environ.copy()
+            env["PYTHONUNBUFFERED"] = "1"
+
             process = subprocess.Popen(
-                ["uv", "run", "python", "src/bbcoach/data/scrapers.py"],
+                ["uv", "run", "python", "-u", "src/bbcoach/data/scrapers.py"],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
                 bufsize=1,
                 universal_newlines=True,
+                env=env,
             )
 
             # Read stdout line by line

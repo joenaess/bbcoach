@@ -1,0 +1,41 @@
+Starting Scraper...
+Found 11 unique teams.
+Processing Team 1/11: Boras Basket
+Scraping https://www.proballers.com/basketball/team/2059/boras-basket/2025
+Saved 824 players to data_storage/players.parquet
+Scraping Schedule https://www.proballers.com/basketball/team/2059/boras-basket/schedule/2025
+Saved 1650 schedule items to data_storage/schedule.parquet
+Scraping https://www.proballers.com/basketball/team/2059/boras-basket/2024
+Traceback (most recent call last):
+  File "/home/jonas/.local/share/uv/python/cpython-3.13.3-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/home/jonas/.local/share/uv/python/cpython-3.13.3-linux-x86_64-gnu/lib/python3.13/asyncio/base_events.py", line 719, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/home/jonas/Projects/bbcoach/src/bbcoach/data/scrapers.py", line 287, in run_scraper
+    await scraper.scrape_all_teams(test_teams, years)
+  File "/home/jonas/Projects/bbcoach/src/bbcoach/data/scrapers.py", line 215, in scrape_all_teams
+    data = await self.scrape_team_season(base_team_url, year)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/jonas/Projects/bbcoach/src/bbcoach/data/scrapers.py", line 62, in scrape_team_season
+    await self.bypass_cloudflare(page)
+  File "/home/jonas/Projects/bbcoach/src/bbcoach/data/scrapers.py", line 49, in bypass_cloudflare
+    await asyncio.sleep(8 + random.random() * 4)
+  File "/home/jonas/.local/share/uv/python/cpython-3.13.3-linux-x86_64-gnu/lib/python3.13/asyncio/tasks.py", line 718, in sleep
+    return await future
+           ^^^^^^^^^^^^
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/jonas/Projects/bbcoach/src/bbcoach/data/scrapers.py", line 301, in <module>
+    asyncio.run(run_scraper())
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "/home/jonas/.local/share/uv/python/cpython-3.13.3-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ~~~~~~~~~~^^^^^^
+  File "/home/jonas/.local/share/uv/python/cpython-3.13.3-linux-x86_64-gnu/lib/python3.13/asyncio/runners.py", line 123, in run
+    raise KeyboardInterrupt()
+KeyboardInterrupt

@@ -70,9 +70,8 @@ def render_comparison_chart(
         margin=dict(l=20, r=20, t=30, b=20),
     )
 
-    # Use width="stretch" per Streamlit 1.41+ deprecation warning
-    # Pass key to avoid duplicate element IDs
+    # Reverting to use_container_width=True to fix empty chart issue
     if key:
-        st.plotly_chart(fig, key=key, width="stretch")
+        st.plotly_chart(fig, key=key, use_container_width=True)
     else:
-        st.plotly_chart(fig, width="stretch")
+        st.plotly_chart(fig, use_container_width=True)

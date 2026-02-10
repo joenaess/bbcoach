@@ -95,6 +95,14 @@ class BasketballScraper:
                 # #, Name, Pos, Height, Age, GP, MIN, PTS, REB, AST, ...
 
                 try:
+                    # HEURISTIC FIX:
+                    # Proballers page has multiple tables (Averages, Totals, Shooting, etc.)
+                    # The "Shooting" table often comes last and has percentages in the early columns.
+                    # We only want the "Averages" table where index 3 is PPG (a number, not %).
+                    # If index 3 contains '%', it's likely a Shooting or Advanced table -> Skip it.
+                    if len(p["stats"]) > 3 and "%" in p["stats"][3]:
+                        continue
+
                     # Extract player ID
                     # link: .../basketball/player/ID/slug
                     pid = p["link"].split("/player/")[1].split("/")[0]

@@ -87,6 +87,10 @@ def load_players() -> pd.DataFrame:
 
             df["3P%"] = df["raw_stats"].apply(lambda x: extract_pct(x, 10))
 
+            # Clean names (remove newlines/spaces)
+            if "name" in df.columns:
+                df["name"] = df["name"].astype(str).str.strip()
+
             # Additional safer defaults
             if "SPG" not in df.columns:
                 df["SPG"] = 0.0
