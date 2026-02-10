@@ -395,9 +395,11 @@ with tab5:
 
         # Try to default to coach's team if set
         default_team_index = 0
-        if "coach" in st.session_state and st.session_state["coach"].team_name:
-            # This might be tricky as team_name is name not ID, but let's try to match or just default to 0
-            pass
+        if st.session_state.get("coach_team"):
+            team_to_find = st.session_state["coach_team"]
+            # We need to map this name to an ID if possible, but for now let's just use it to find index
+            # Actually, `teams_list` contains IDs. `team_name` logic down below does the mapping.
+            # We need `teams_df` loaded earlier to do this mapping correctly for default index.
 
         selected_team_id = st.selectbox(
             "Select Team", teams_list, format_func=lambda x: f"Team {x}"
