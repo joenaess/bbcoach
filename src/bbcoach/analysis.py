@@ -102,40 +102,57 @@ def get_team_aggregates(players_df, team_id, season):
                 # '44.5%' (Index 10) -> 3P%?
                 # '87%' (Index 11) -> FT%?
 
+                # Use pre-calculated columns from storage.py if available
+                # This ensures consistent parsing logic (handling Totals, etc.)
                 p_stats = {
-                    "name": row["name"].strip(),
-                    "ppg": parse_stat(raw[3]),
-                    "rpg": parse_stat(raw[4]),
-                    "apg": parse_stat(raw[5]),
-                    "gp": parse_stat(raw[6]),
-                    "min": parse_stat(raw[8]),
-                    "fg_pct": parse_stat(raw[9].replace("%", "")),
-                    "3p_pct": parse_stat(raw[10].replace("%", "")),
-                    "to": parse_stat(raw[18]),
-                    "eff": parse_stat(raw[-4]),
+                    "name": row.get("name", "").strip(),
+                    "ppg": float(row.get("PPG", 0.0)),
+                    "rpg": float(row.get("RPG", 0.0)),
+                    "apg": float(row.get("APG", 0.0)),
+                    "gp": float(row.get("GP", 0.0)),
+                    "min": float(row.get("MIN", 0.0)),
+                    "fg_pct": float(row.get("FG%", 0.0)),
+                    "3p_pct": float(row.get("3P%", 0.0)),
+                    "to": float(row.get("TO", 0.0)),
+                    "eff": float(row.get("EFF", 0.0)),
                 }
                 parsed_players.append(p_stats)
             else:
-                # Fallback
-                parsed_players.append(
-                    {
-                        "name": row["name"].strip(),
-                        "ppg": 0,
-                        "rpg": 0,
-                        "apg": 0,
-                        "min": 0,
-                        "fg_pct": 0,
-                        "3p_pct": 0,
-                        "to": 0,
-                    }
-                )
+                # Fallback (should rarely happen if storage.py does its job)
+                p_stats = {
+                    "name": row.get("name", "").strip(),
+                    "ppg": float(row.get("PPG", 0.0)),
+                    "rpg": float(row.get("RPG", 0.0)),
+                    "apg": float(row.get("APG", 0.0)),
+                    "gp": float(row.get("GP", 0.0)),
+                    "min": float(row.get("MIN", 0.0)),
+                    "fg_pct": float(row.get("FG%", 0.0)),
+                    "3p_pct": float(row.get("3P%", 0.0)),
+                    "to": float(row.get("TO", 0.0)),
+                    "eff": float(row.get("EFF", 0.0)),
+                }
+                parsed_players.append(p_stats)
 
         except Exception:
             continue
 
     # Sort by PPG to get rotation
-    parsed_players.sort(key=lambda x: x["ppg"], reverse=True)
-    rotation = parsed_players[:8]  # Top 8 rotation
+    # FILTER: Exclude players with fewer than 5 games played to avoid 1-game wonders skewing analysis
+    # Exception: If the season is very early (e.g. team played < 8 games total), we might need to lower this.
+    # But for now, hard filter GP >= 5 is safer.
+
+    # Check max GP in the roster to gauge season progress
+    max_gp = max((p["gp"] for p in parsed_players), default=0)
+    gp_threshold = 5 if max_gp >= 8 else 1  # Adaptive threshold
+
+    rotation_candidates = [p for p in parsed_players if p["gp"] >= gp_threshold]
+
+    # Fallback: if we filtered everyone out (unlikely), use everyone
+    if not rotation_candidates:
+        rotation_candidates = parsed_players
+
+    rotation_candidates.sort(key=lambda x: x["ppg"], reverse=True)
+    rotation = rotation_candidates[:8]  # Top 8 rotation from eligible players
 
     stats["total_ppg"] = sum(p["ppg"] for p in rotation)
     stats["total_rpg"] = sum(p["rpg"] for p in rotation)
