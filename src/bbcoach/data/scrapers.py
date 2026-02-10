@@ -284,17 +284,21 @@ async def run_scraper():
     # PROD RUN: last 5 seasons
     years = [2025, 2024, 2023, 2022, 2021]
 
-    await scraper.scrape_all_teams(test_teams, years)
-    await scraper.stop()
+    try:
+        await scraper.scrape_all_teams(test_teams, years)
+    except Exception as e:
+        print(f"Scraper Error: {e}")
+    finally:
+        await scraper.stop()
 
-    # Save Metadata with Timestamp
-    from datetime import datetime
+        # Save Metadata with Timestamp
+        from datetime import datetime
 
-    metadata = {"last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-    os.makedirs("data_storage", exist_ok=True)
-    with open("data_storage/metadata.json", "w") as f:
-        json.dump(metadata, f)
-    print("Scraping Complete. Metadata Saved.")
+        metadata = {"last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+        os.makedirs("data_storage", exist_ok=True)
+        with open("data_storage/metadata.json", "w") as f:
+            json.dump(metadata, f)
+        print("Scraping Process Completed (Metadata Saved).")
 
 
 if __name__ == "__main__":
