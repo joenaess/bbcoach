@@ -20,6 +20,10 @@
   - **Multi-Season Trends**: Aggregates data from 2021-2025 to determine true program strength.
   - **Deep Stats**: Calculates **eFG%**, **Turnover Ratio**, and **3P% Efficiency**.
 - **League Stats**: Historical data browser for Teams and Players.
+- **Knowledge Base (RAG)**:
+  - **Drill Scraper**: Crawls *Breakthrough Basketball* for thousands of drills and plays.
+  - **Vector Search**: Indexes content locally using **ChromaDB** for semantic search.
+  - **Context-Aware Chat**: "Coach's Corner" automatically retrieves relevant drills to answer your training questions.
 
 ### 🎨 Pro Interface
 
@@ -73,6 +77,8 @@ The scraper runs in the background to fetch stats from Proballers. To run it man
 uv run python src/bbcoach/data/scrapers.py
 ```
 
+- **Knowledge Base**: Updates can be triggered directly within the app under the "Knowledge Base" tab.
+
 ### 5. Run the App
 
 ```bash
@@ -85,6 +91,7 @@ uv run streamlit run app.py
 
 - `src/bbcoach/data`: Scrapers and Parquet storage logic.
 - `src/bbcoach/ai`: AI implementation (`coach.py`) handling Gemini/Local switching.
+- `src/bbcoach/rag`: RAG pipeline, vector store, and drill scrapers.
 - `src/bbcoach/analysis.py`: Statistical engines for matchups and lineups.
 - `app.py`: Main Streamlit application.
 
