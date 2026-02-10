@@ -469,22 +469,45 @@ with tab1:
         display_data = []
         for _, row in season_players.iterrows():
             try:
-                raw = row["raw_stats"]
-                display_data.append(
-                    {
-                        "Name": row["name"],
-                        "Team": team_id_map.get(str(row["team_id"]), row["team_id"]),
-                        "PPG": raw[3],
-                        "RPG": raw[4],
-                        "APG": raw[5],
-                        "GP": raw[6],
-                        "MIN": raw[8],
-                        "FG%": raw[9],
-                        "3P%": raw[10],
-                        "FT%": raw[11],
-                        "EFF": raw[-4] if len(raw) > 20 else "N/A",
-                    }
-                )
+                # Use direct columns if available (new scraper), else fallback to raw_stats (legacy)
+                if "PPG" in row:
+                    display_data.append(
+                        {
+                            "Name": row["name"],
+                            "Team": team_id_map.get(
+                                str(row["team_id"]), row["team_id"]
+                            ),
+                            "PPG": row.get("PPG", 0),
+                            "RPG": row.get("RPG", 0),
+                            "APG": row.get("APG", 0),
+                            "GP": row.get("GP", 0),
+                            "MIN": row.get("MIN", 0),
+                            "FG%": row.get("FG%", 0),
+                            "3P%": row.get("3P%", 0),
+                            "FT%": row.get("FT%", 0),
+                            "EFF": row.get("EFF", 0),
+                        }
+                    )
+                else:
+                    # Legacy fallback
+                    raw = row["raw_stats"]
+                    display_data.append(
+                        {
+                            "Name": row["name"],
+                            "Team": team_id_map.get(
+                                str(row["team_id"]), row["team_id"]
+                            ),
+                            "PPG": raw[3],
+                            "RPG": raw[4],
+                            "APG": raw[5],
+                            "GP": raw[6],
+                            "MIN": raw[8],
+                            "FG%": raw[9],
+                            "3P%": raw[10],
+                            "FT%": raw[11],
+                            "EFF": raw[-4] if len(raw) > 20 else "N/A",
+                        }
+                    )
             except Exception:
                 continue
 
