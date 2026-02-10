@@ -326,6 +326,28 @@ if st.sidebar.button("Refresh Data"):
 
 players_df, teams_df = get_data()
 
+# --- LEAGUE FILTER ---
+# Ensure "league" column exists (backwards compatibility handled in storage.py but good to be safe)
+if "league" not in players_df.columns and not players_df.empty:
+    players_df["league"] = "Men"
+if "league" not in teams_df.columns and not teams_df.empty:
+    teams_df["league"] = "Men"
+
+# Sidebar Selection
+st.sidebar.markdown("### 🏆 League")
+available_leagues = ["Men", "Women"]
+# Ideally, we could check what's in the data, but we want to support both.
+selected_league = st.sidebar.radio(
+    "Select League", available_leagues, index=0, horizontal=True
+)
+
+# Filter Dataframes
+if not players_df.empty:
+    players_df = players_df[players_df["league"] == selected_league]
+
+if not teams_df.empty:
+    teams_df = teams_df[teams_df["league"] == selected_league]
+
 st.sidebar.markdown(f"**Total Players:** {len(players_df)}")
 st.sidebar.markdown(f"**Total Teams:** {len(teams_df)}")
 

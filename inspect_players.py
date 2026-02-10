@@ -1,10 +1,7 @@
-import pandas as pd
 import sys
-from pathlib import Path
 
 # Add src to path just in case, though we just need pandas here mostly
 sys.path.append("src")
-from bbcoach.data.storage import load_players
 
 
 def inspect_problematic_players():
@@ -35,7 +32,6 @@ def inspect_problematic_players():
         print("Name column missing.")
         return
 
-    mask = df["name"].isin(target_names)
     # Also check case-insensitive match
     mask_ci = df["name"].str.lower().isin([n.lower() for n in target_names])
 

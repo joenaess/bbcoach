@@ -12,15 +12,16 @@ def ensure_data_dir():
 def save_teams(teams_data: list[dict], filename="teams.parquet"):
     ensure_data_dir()
     df = pd.DataFrame(teams_data)
-    # Append if exists, or overwrite? For now overwrite to keep it simple or we can use partition by season
-    # Let's just save one big file for now
     path = DATA_DIR / filename
     if path.exists():
         existing_df = pd.read_parquet(path)
         # simplistic merge: concat and drop duplicates
-        df = pd.concat([existing_df, df]).drop_duplicates(
-            subset=["id", "season"], keep="last"
-        )
+        # Include league in subset if available
+        subset = ["id", "season"]
+        if "league" in df.columns:
+            subset.append("league")
+
+        df = pd.concat([existing_df, df]).drop_duplicates(subset=subset, keep="last")
 
     df.to_parquet(path)
     print(f"Saved {len(df)} teams to {path}")
@@ -32,9 +33,12 @@ def save_players(players_data: list[dict], filename="players.parquet"):
     path = DATA_DIR / filename
     if path.exists():
         existing_df = pd.read_parquet(path)
-        df = pd.concat([existing_df, df]).drop_duplicates(
-            subset=["id", "season", "team_id"], keep="last"
-        )
+        # Include league in subset if available
+        subset = ["id", "season", "team_id"]
+        if "league" in df.columns or "league" in existing_df.columns:
+            subset.append("league")
+
+        df = pd.concat([existing_df, df]).drop_duplicates(subset=subset, keep="last")
 
     df.to_parquet(path)
     print(f"Saved {len(df)} players to {path}")
@@ -43,7 +47,10 @@ def save_players(players_data: list[dict], filename="players.parquet"):
 def load_teams() -> pd.DataFrame:
     path = DATA_DIR / "teams.parquet"
     if path.exists():
-        return pd.read_parquet(path)
+        df = pd.read_parquet(path)
+        if "league" not in df.columns:
+            df["league"] = "Men"  # Default to Men for legacy data
+        return df
     return pd.DataFrame()
 
 
@@ -51,6 +58,10 @@ def load_players() -> pd.DataFrame:
     path = DATA_DIR / "players.parquet"
     if path.exists():
         df = pd.read_parquet(path)
+
+        # Default league if missing
+        if "league" not in df.columns:
+            df["league"] = "Men"
 
         # Pre-process raw stats into columns if they exist
         if "raw_stats" in df.columns:
@@ -76,15 +87,42 @@ def load_players() -> pd.DataFrame:
                 except Exception:
                     return 0.0
 
-            # Pre-calculate GP to identify Totals
-            df["GP"] = df["raw_stats"].apply(lambda x: extract_stat(x, 6))
+            # Helper to safely get raw stats list
+            def get_raw(x):
+                # Handle lists and numpy arrays (from parquet)
+                if x is not None and hasattr(x, "__len__") and not isinstance(x, str):
+                    if len(x) > 0:
+                        return x
+                return None
 
-            def smart_parse_ppg(row):
+            # Only apply logic where raw_stats is valid
+            # If raw_stats is missing (new data), we trust the existing columns (PPG, etc.)
+
+            # Helper wrapper to apply only if raw stats exist
+            def smart_apply(row, func, col_name):
+                raw = get_raw(row.get("raw_stats"))
+                if raw is not None and len(raw) > 0:
+                    return func(raw)
+                # Return existing value if available, else 0.0
+                return row.get(col_name, 0.0)
+
+            # Pre-calculate GP to identify Totals
+            # df["GP"] = df["raw_stats"].apply(lambda x: extract_stat(x, 6)) # OLD
+            df["GP"] = df.apply(
+                lambda r: smart_apply(r, lambda x: extract_stat(x, 6), "GP"), axis=1
+            )
+
+            def smart_parse_ppg(raw_list):
                 """
                 Detects if a row is 'Totals' (integers) or 'Averages' (floats).
                 If Total and GP > 1, returns Total / GP.
                 """
                 try:
+                    if len(raw_list) <= 6:
+                        return 0.0
+
+                    row = raw_list  # Alias for clarity in logic copy-paste
+
                     raw_pts = str(row[3])
                     if "%" in raw_pts:
                         return 0.0  # Bad row (Shooting stats)
@@ -92,10 +130,6 @@ def load_players() -> pd.DataFrame:
                     pts = float(raw_pts) if raw_pts != "-" else 0.0
 
                     # Heuristic for Total:
-                    # 1. GP > 1
-                    # 2. Points are high (e.g. > 40) OR No decimal point in source string (integers)
-                    # Checking for decimal point is tricky with floats, so rely on magnitude + integer-like string
-
                     is_integer_string = "." not in raw_pts and raw_pts != "-"
                     gp = float(row[6]) if row[6] != "-" else 0.0
 
@@ -103,68 +137,15 @@ def load_players() -> pd.DataFrame:
                         # Likely a total
                         return round(pts / gp, 1)
 
-                    # Fallback Sanity Check for 100.0 PPG (Mio Hjalmarsson case if unhandled)
+                    # Fallback Sanity Check for 100.0 PPG
                     if pts >= 99.0 and gp > 5:
-                        # Unlikely to average 100 PPG?
-                        # Could be a percentage slipped in?
-                        # If raw string literally was "100", treat as Total -> 100/GP
                         return round(pts / gp, 1)
 
                     return pts
                 except Exception:
                     return 0.0
 
-            # General function for other stats (RPG, APG) following same logic if needed
-            # For now, let's just fix PPG specifically or apply generic total-fix
-
-            def smart_parse(row, idx):
-                try:
-                    raw_val = str(row[idx])
-                    if "%" in raw_val:
-                        return 0.0
-
-                    val = float(raw_val) if raw_val != "-" else 0.0
-
-                    # If we determined the row is a "Total Row" via PPG check, we should divide this too.
-                    # But doing it row-by-row is expensive.
-                    # Let's simple check: if value is integer-string and > 20 and GP > 1, divide?
-                    # Except REB/AST are lower.
-
-                    # Better approach: Check if PPG logic decided it was a total.
-                    # Let's re-use the "is_total" concept.
-                    # raw[3] is PTS.
-                    raw_pts = str(row[3])
-                    is_total_row = False
-                    gp = float(row[6]) if row[6] != "-" else 0.0
-
-                    if (
-                        gp > 1
-                        and "." not in raw_pts
-                        and raw_pts != "-"
-                        and float(raw_pts) > 0
-                    ):
-                        # Strong indicator of total row if PTS is integer
-                        is_total_row = True
-
-                    if is_total_row:
-                        return round(val / gp, 1)
-
-                    return val
-                except Exception:
-                    return 0.0
-
-            # Apply Smart Parse
-            # Note: We pass the whole 'raw_stats' list to apply, so x is the list.
-            # But we also need GP.
-            # It's cleaner to use apply on the DataFrame row, but 'raw_stats' is a column of lists.
-
-            # Let's map it using the list directly
-            df["PPG"] = df["raw_stats"].apply(
-                lambda x: smart_parse_ppg(x) if len(x) > 6 else 0.0
-            )
-
-            # For others, we need a slightly localized smart_parse that knows about the list
-            # We can just define a helper that takes the list
+            # General function for other stats (RPG, APG)
             def get_stat_smart(raw_list, idx):
                 if len(raw_list) <= idx:
                     return 0.0
@@ -190,53 +171,64 @@ def load_players() -> pd.DataFrame:
                 except Exception:
                     return 0.0
 
-            df["RPG"] = df["raw_stats"].apply(lambda x: get_stat_smart(x, 4))
-            # Sanity Cap for RPG: > 20 is likely error (League leader usually ~12)
+            # Apply Smart Parse
+            df["PPG"] = df.apply(
+                lambda r: smart_apply(r, lambda x: smart_parse_ppg(x), "PPG"), axis=1
+            )
+
+            # RPG
+            df["RPG"] = df.apply(
+                lambda r: smart_apply(r, lambda x: get_stat_smart(x, 4), "RPG"), axis=1
+            )
+            # Sanity Cap for RPG
             df["RPG"] = df.apply(
                 lambda row: 0.0 if row["RPG"] > 20 else row["RPG"], axis=1
             )
 
-            df["APG"] = df["raw_stats"].apply(lambda x: get_stat_smart(x, 5))
-            # Sanity Cap for APG: > 15 is likely error
+            # APG
+            df["APG"] = df.apply(
+                lambda r: smart_apply(r, lambda x: get_stat_smart(x, 5), "APG"), axis=1
+            )
+            # Sanity Cap for APG
             df["APG"] = df.apply(
                 lambda row: 0.0 if row["APG"] > 15 else row["APG"], axis=1
             )
 
-            df["MIN"] = df["raw_stats"].apply(lambda x: get_stat_smart(x, 8))
-            # Sanity Cap for MIN: > 48 (NBA max)
+            # MIN
+            df["MIN"] = df.apply(
+                lambda r: smart_apply(r, lambda x: get_stat_smart(x, 8), "MIN"), axis=1
+            )
+            # Sanity Cap for MIN
             df["MIN"] = df.apply(
                 lambda row: 0.0 if row["MIN"] > 48 else row["MIN"], axis=1
             )
 
             # Consistency Check: PPG vs MIN
-            # It's impossible to score 20 PPG in 2 MPG. (10 pts per minute is unheard of).
-            # Threshold: If PPG > MIN * 1.5 AND MIN > 1 (to avoid div/0 or 1-min wonders), flag as suspicious.
-            # Realistically, high scoring is ~0.5-0.8 pts/min. > 1.5 is very likely data error (e.g. Total Pts in Avg Min?).
             def check_ppg_min(row):
-                ppg = row["PPG"]
-                min_played = row["MIN"]
-                if min_played > 1 and ppg > (
-                    min_played * 2.5
-                ):  # Very generous buffer (2.5 pts/min)
-                    # Likely error. Set PPG to 0 or cap it?
-                    # Let's cap it to MIN * 2 (still insane but better than 100)
+                ppg = row.get("PPG", 0.0)
+                min_played = row.get("MIN", 0.0)
+                if min_played > 1 and ppg > (min_played * 2.5):
                     return round(min_played * 2, 1)
                 return ppg
 
             df["PPG"] = df.apply(check_ppg_min, axis=1)
 
-            df["TO"] = df["raw_stats"].apply(lambda x: get_stat_smart(x, 18))
+            df["TO"] = df.apply(
+                lambda r: smart_apply(r, lambda x: get_stat_smart(x, 18), "TO"), axis=1
+            )
 
             # Percentages
-            df["3P%"] = df["raw_stats"].apply(
-                lambda x: extract_stat(x, 10, is_percent=True)
+            df["3P%"] = df.apply(
+                lambda r: smart_apply(r, lambda x: extract_stat(x, 10, True), "3P%"),
+                axis=1,
             )
-            df["FG%"] = df["raw_stats"].apply(
-                lambda x: extract_stat(x, 9, is_percent=True)
+            df["FG%"] = df.apply(
+                lambda r: smart_apply(r, lambda x: extract_stat(x, 9, True), "FG%"),
+                axis=1,
             )
-            df["EFF"] = df["raw_stats"].apply(
-                lambda x: extract_stat(x, -4)
-            )  # Index -4 for EFF usually safe?
+            df["EFF"] = df.apply(
+                lambda r: smart_apply(r, lambda x: extract_stat(x, -4), "EFF"), axis=1
+            )
 
             # Additional simple column checks
             if "SPG" not in df.columns:

@@ -175,8 +175,10 @@ class GeniusScraper:
 
         return list(set(player_ids))  # Unique IDs
 
-    def scrape_competition(self, comp_id, season_year):
-        logger.info(f"Scraping competition {comp_id} for season {season_year}")
+    def scrape_competition(self, comp_id, season_year, league=None):
+        logger.info(
+            f"Scraping competition {comp_id} for season {season_year} ({league})"
+        )
 
         # 1. Get Global Stats
         stats_url = self.get_comp_url(comp_id, "statistics/player")
@@ -190,7 +192,7 @@ class GeniusScraper:
         logger.info(f"Found {len(global_stats)} players with stats.")
 
         if not global_stats:
-            return []
+            return [], []
 
         # 2. Get Teams
         teams = self.get_teams(comp_id)
@@ -210,14 +212,29 @@ class GeniusScraper:
                     p_data["team_name"] = team["name"]
                     p_data["season"] = season_year
                     p_data["id"] = pid  # Use Genius ID as main ID
+                    if league:
+                        p_data["league"] = league
 
                     # Normalize KEYS to match what app expects
-                    # app expects: PPG, APG, RPG, GP, MIN, 'raw_stats' (legacy)
-                    # We should populate 'raw_stats' with something to prevent crashes?
-                    # Or update app to use direct columns.
-                    # Best to populate direct columns AND maybe 'raw_stats' as dummy?
-                    # Storage.py 'smart_parse' relies on 'raw_stats'.
-                    # We should UPDATE storage.py to handle direct columns if they exist!
+                    # The app expects: PPG, APG, RPG, GP, MIN, 'raw_stats' (legacy)
+                    # We should populate 'raw_stats' with dummy data to prevent crashes in storage.py
+                    # if it still relies on it, or better, update storage.py to handle direct columns.
+                    # Per plan, we will update storage.py.
+
+                    # Ensure essential numeric fields exist
+                    for key in [
+                        "PPG",
+                        "RPG",
+                        "APG",
+                        "GP",
+                        "MIN",
+                        "3P%",
+                        "FG%",
+                        "FT%",
+                        "EFF",
+                    ]:
+                        if key not in p_data:
+                            p_data[key] = 0.0
 
                     final_players.append(p_data)
                 else:
@@ -227,3 +244,110 @@ class GeniusScraper:
             time.sleep(1)  # Politeness
 
         return final_players, teams
+
+    def get_schedule(self, comp_id):
+        url = self.get_comp_url(comp_id, "schedule")
+        html = self.fetch_page(url)
+        if not html:
+            return []
+
+        soup = BeautifulSoup(html, "html.parser")
+        schedule_data = []
+
+        # Look for match wrappers
+        matches = soup.find_all("div", class_="match-wrap")
+
+        for match in matches:
+            # 1. Date
+            date_text = "Unknown"
+            date_div = match.find("div", class_="match-time")
+            if date_div:
+                span = date_div.find("span")
+                if span:
+                    date_text = span.get_text(strip=True)
+
+            # 2. Teams
+            sched_teams = match.find("div", class_="sched-teams")
+            if not sched_teams:
+                continue
+
+            home_div = sched_teams.find("div", class_="home-team")
+            away_div = sched_teams.find(
+                "div", class_="visiting-team"
+            )  # "visiting-team" or "away-team"? usually "visiting-team" in genius
+
+            if not away_div:
+                away_div = sched_teams.find("div", class_="away-team")  # fallback
+
+            if not home_div or not away_div:
+                continue
+
+            # Helper to get team info
+            def get_team_info(div):
+                name_div = div.find("div", class_="team-name")
+                if not name_div:
+                    return None, None
+                a_tag = name_div.find("a")
+                if not a_tag:
+                    return None, None
+
+                name = a_tag.get_text(strip=True)
+                href = a_tag["href"]
+                # Extract ID
+                tid = None
+                match_id = re.search(r"/team/(\d+)", href)
+                if match_id:
+                    tid = match_id.group(1)
+                return name, tid
+
+            home_name, home_id = get_team_info(home_div)
+            away_name, away_id = get_team_info(away_div)
+
+            if not home_id or not away_id:
+                continue
+
+            # 3. Score
+            # Usually in div.team-score
+            def get_score(div):
+                score_div = div.find("div", class_="team-score")
+                if score_div:
+                    return score_div.get_text(strip=True)
+                return "0"
+
+            home_score = get_score(home_div)
+            away_score = get_score(away_div)
+
+            result_str = "Scheduled"
+            # If scores are numeric, create result string
+            if home_score.isdigit() and away_score.isdigit():
+                # Logic: if date is in past (heuristic) or status is complete?
+                # The match div has class STATUS_COMPLETE
+                if "STATUS_COMPLETE" in match.get("class", []):
+                    result_str = f"{home_score}-{away_score}"
+
+            # Add records
+            schedule_data.append(
+                {
+                    "date": date_text,
+                    "team_id": home_id,
+                    "team_name": home_name,
+                    "opponent": away_name,
+                    "opponent_id": away_id,
+                    "result": result_str,
+                    "home_away": "Home",
+                }
+            )
+
+            schedule_data.append(
+                {
+                    "date": date_text,
+                    "team_id": away_id,
+                    "team_name": away_name,
+                    "opponent": home_name,
+                    "opponent_id": home_id,
+                    "result": result_str,
+                    "home_away": "Away",
+                }
+            )
+
+        return schedule_data

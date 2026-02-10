@@ -1,6 +1,5 @@
 import sys
 import os
-import pandas as pd
 import pytest
 
 # Add src to path
@@ -16,29 +15,6 @@ def players_df():
 
 def test_dataframe_not_empty(players_df):
     assert not players_df.empty, "Players DataFrame should not be empty"
-
-
-def test_ppg_consistency(players_df):
-    """
-    Verify that PPG is roughly equal to Total Points / GP.
-    We allow a small margin of error (e.g. 0.5) due to rounding.
-    Only applies if Total Points are available/parsable from raw_stats.
-    """
-    for i, row in players_df.iterrows():
-        try:
-            gp = float(row["GP"])
-            ppg = float(row["PPG"])
-
-            if gp > 0:
-                # Attempt to extract PTS from raw_stats (index 3 usually, or parsed via logic)
-                # This is tricky because raw_stats[3] might be the "Total" we fixed, or the "Average" we parsed.
-                # Let's trust the logic: If we have a 'PTS' column or can infer it.
-                # Actually, our parser extracts 'PPG' directly.
-                # We can validte: PPG * GP <= Total Points (if we had total points).
-                # Sanity check: PPG shouldn't be insanely high relative to minutes (if mins exist).
-                pass
-        except:
-            continue
 
 
 def test_sanity_caps(players_df):
