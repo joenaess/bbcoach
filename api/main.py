@@ -14,12 +14,14 @@ from contextlib import asynccontextmanager
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import ORJSONResponse
 from pydantic import BaseModel
 
 from bbcoach.config import settings
 from bbcoach.core import CoachService, AnalyticsService, DataService
+from bbcoach.data.scrapers import main as scrape_all
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,13 @@ class CoachRequest(BaseModel):
     provider: Optional[str] = None
     api_key: Optional[str] = None
     model_name: Optional[str] = None
+    team_id: Optional[str] = None
+    season: Optional[int] = None
+
+
+class MultiMatchupRequest(BaseModel):
+    team_a_id: str
+    team_b_id: str
 
 
 class ScoutRequest(BaseModel):
@@ -51,10 +60,18 @@ class PlayerRequest(BaseModel):
 
 
 # Global service instances
-data_service: DataService
-analytics_service: AnalyticsService
-coach_service: CoachService
+data_service = DataService()
+analytics_service = AnalyticsService(data_service)
+coach_service = CoachService()
 
+# Global scraper progress state
+scraping_progress = {
+    "status": "idle",
+    "current": 0,
+    "total": 0,
+    "team": "",
+    "league": ""
+} 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -117,6 +134,50 @@ async def refresh_data_cache():
     return {"message": "Cache refreshed", "status": status}
 
 
+@app.post("/api/data/fetch")
+async def fetch_latest_data(background_tasks: BackgroundTasks):
+    """Run the scraper in the background and return immediately."""
+    global scraping_progress
+    
+    if scraping_progress["status"] == "fetching":
+        return {"message": "Scraping is already in progress.", "status": data_service.get_data_status()}
+
+    scraping_progress = {
+        "status": "fetching",
+        "current": 0,
+        "total": 0,
+        "team": "Initializing...",
+        "league": "Starting"
+    }
+    
+    def update_progress(team_name, current_idx, total_count, league_name):
+        scraping_progress["current"] = current_idx
+        scraping_progress["total"] = total_count
+        scraping_progress["team"] = team_name
+        scraping_progress["league"] = league_name
+
+    def run_scraper_task():
+        try:
+            players_count, teams_count = scrape_all(progress_callback=update_progress)
+            data_service.update_metadata()
+            data_service.clear_cache()  # Force reload from disk
+            scraping_progress["status"] = "idle"
+        except Exception as e:
+            scraping_progress["status"] = "error"
+            logger.error(f"Error fetching data: {e}", exc_info=True)
+
+    background_tasks.add_task(run_scraper_task)
+    
+    return {
+        "message": "Scraping started in background.",
+        "status": data_service.get_data_status()
+    }
+
+@app.get("/api/data/fetch-progress")
+async def get_fetch_progress():
+    """Return the current data scraping execution progress."""
+    return scraping_progress
+
 # Stats endpoints
 @app.get("/api/stats/seasons")
 async def get_seasons(league: str = Query("Men", description="League filter")):
@@ -135,19 +196,16 @@ async def get_teams(
     return {"season": season, "league": league, "teams": teams}
 
 
-@app.get("/api/stats/top-players")
+@app.get("/api/stats/top-players", response_class=ORJSONResponse)
 async def get_top_players(
-    season: int = Query(..., description="Season year"),
-    league: str = Query("Men", description="League filter"),
-    metric: str = Query("PPG", description="Statistic to sort by"),
-    limit: int = Query(10, description="Number of results"),
+    season: int, league: str = "Men", metric: str = "PPG", limit: int = 10
 ):
-    """Get top players by metric."""
+    """Get top players for a specific metric."""
     players = analytics_service.get_top_players(season, league, metric, limit)
     return {"season": season, "league": league, "metric": metric, "players": players}
 
 
-@app.get("/api/stats/team/{team_id}")
+@app.get("/api/stats/team/{team_id}", response_class=ORJSONResponse)
 async def get_team_stats(team_id: str, season: int = Query(...)):
     """Get team statistics."""
     stats = analytics_service.get_team_stats(team_id, season)
@@ -187,14 +245,14 @@ async def predict_matchup(request: MatchupRequest):
 
 
 @app.post("/api/analytics/predict-matchup-multi-season")
-async def predict_multi_season_matchup(team_a_id: str, team_b_id: str):
+async def predict_multi_season_matchup(request: MultiMatchupRequest):
     """Predict matchup using multi-season data."""
-    analysis = analytics_service.predict_matchup_multi_season(team_a_id, team_b_id)
+    analysis = analytics_service.predict_matchup_multi_season(request.team_a_id, request.team_b_id)
     if analysis is None:
         raise HTTPException(status_code=404, detail="Multi-season prediction failed")
     return {
-        "team_a_id": team_a_id,
-        "team_b_id": team_b_id,
+        "team_a_id": request.team_a_id,
+        "team_b_id": request.team_b_id,
         "analysis": analysis,
     }
 
@@ -208,7 +266,14 @@ async def ask_coach(request: CoachRequest):
         if request.provider:
             coach_service.reload_provider(request.provider, request.api_key, request.model_name)
 
-        response = coach_service.ask(request.question, request.context)
+        # If the frontend pushed myTeamId, get their real data for the AI logic context
+        resolved_context = request.context
+        if request.team_id and request.season:
+            stats = analytics_service.get_team_stats(request.team_id, request.season)
+            if stats:
+                resolved_context = f"Team Statistics ({request.season}):\n{stats}\n\n" + resolved_context
+
+        response = coach_service.ask(request.question, resolved_context)
         model_info = coach_service.get_model_info()
 
         return {

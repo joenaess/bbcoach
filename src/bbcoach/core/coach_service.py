@@ -57,8 +57,15 @@ class CoachService:
         Returns:
             The coach's response
         """
+        system_persona = (
+            "You are an expert basketball assistant coach. "
+            "Provide highly strategic, concise, and actionable advice "
+            "based on the provided statistics and team context."
+        )
+        full_context = f"{system_persona}\n\n{context}" if context else system_persona
+        
         coach = self._get_coach()
-        return coach.ask(context, question)
+        return coach.ask(full_context, question)
 
     def get_model_info(self) -> str:
         """Get information about the currently active model."""

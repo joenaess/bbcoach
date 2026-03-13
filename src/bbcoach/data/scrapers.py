@@ -13,26 +13,11 @@ logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
-def main():
+def scrape_competitions(competitions: list[dict], progress_callback=None) -> tuple[int, int]:
+    """Helper to run the scraper for specific competitions."""
     logger.info("Starting Genius Sports Scraper...")
     scraper = GeniusScraper()
-
-    # Configuration for Competitions
-    competitions = [
-        # --- MEN (SBL Herr) ---
-        {"id": 41539, "name": "SBL Herr", "year": 2025, "league": "Men"},
-        {"id": None, "name": "SBL Herr", "year": 2024, "league": "Men"},
-        {"id": None, "name": "SBL Herr", "year": 2023, "league": "Men"},
-        {"id": None, "name": "SBL Herr", "year": 2022, "league": "Men"},
-        {"id": None, "name": "SBL Herr", "year": 2021, "league": "Men"},
-        # --- WOMEN (SBL Dam) ---
-        {"id": 42013, "name": "SBL Dam", "year": 2025, "league": "Women"},
-        {"id": None, "name": "SBL Dam", "year": 2024, "league": "Women"},
-        {"id": None, "name": "SBL Dam", "year": 2023, "league": "Women"},
-        {"id": None, "name": "SBL Dam", "year": 2022, "league": "Women"},
-        {"id": None, "name": "SBL Dam", "year": 2021, "league": "Women"},
-    ]
-
+    
     all_players = []
     all_teams = []
 
@@ -47,7 +32,7 @@ def main():
             f"Scraping Competition {i}/{total_comps}: {comp['name']} ({comp['league']})"
         )
         players, teams = scraper.scrape_competition(
-            comp["id"], comp["year"], league=comp["league"]
+            comp["id"], comp["year"], league=comp["league"], progress_callback=progress_callback
         )
 
         if players:
@@ -70,6 +55,35 @@ def main():
         save_teams(all_teams, filename="teams.parquet")
 
     logger.info("Scraping Complete!")
+    return len(all_players), len(all_teams)
+
+
+def run_current_season(progress_callback=None) -> tuple[int, int]:
+    """Scrape only the current active season (2025)."""
+    competitions = [
+        {"id": 41539, "name": "SBL Herr", "year": 2025, "league": "Men"},
+        {"id": 42013, "name": "SBL Dam", "year": 2025, "league": "Women"},
+    ]
+    return scrape_competitions(competitions, progress_callback=progress_callback)
+
+
+def main(progress_callback=None):
+    """Scrape all historical seasons (Initial Setup)."""
+    competitions = [
+        # --- MEN (SBL Herr) ---
+        {"id": 41539, "name": "SBL Herr", "year": 2025, "league": "Men"},
+        {"id": 36998, "name": "SBL Herr", "year": 2024, "league": "Men"},
+        {"id": 32115, "name": "SBL Herr", "year": 2023, "league": "Men"},
+        {"id": None, "name": "SBL Herr", "year": 2022, "league": "Men"},
+        {"id": None, "name": "SBL Herr", "year": 2021, "league": "Men"},
+        # --- WOMEN (SBL Dam) ---
+        {"id": 42013, "name": "SBL Dam", "year": 2025, "league": "Women"},
+        {"id": 37248, "name": "SBL Dam", "year": 2024, "league": "Women"},
+        {"id": 31766, "name": "SBL Dam", "year": 2023, "league": "Women"},
+        {"id": None, "name": "SBL Dam", "year": 2022, "league": "Women"},
+        {"id": None, "name": "SBL Dam", "year": 2021, "league": "Women"},
+    ]
+    return scrape_competitions(competitions, progress_callback=progress_callback)
 
 
 if __name__ == "__main__":

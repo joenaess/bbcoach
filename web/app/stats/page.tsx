@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,12 +10,42 @@ import { useAppStore } from "@/hooks/use-app-store";
 
 const METRICS = ["PPG", "RPG", "APG", "3P%", "FG%", "EFF"];
 
+import Link from "next/link";
+import { Info } from "lucide-react";
+
 export default function StatsPage() {
   const { currentSeason, currentLeague, setCurrentSeason, setCurrentLeague } = useAppStore();
-  const { data: seasonsData } = useSeasons(currentLeague);
+  const { data: seasonsData, isLoading: isLoadingSeasons } = useSeasons(currentLeague);
   const [metric, setMetric] = useState("PPG");
 
   const topPlayers = useTopPlayers(currentSeason, currentLeague, metric, 10);
+
+  useEffect(() => {
+    if (seasonsData?.seasons && seasonsData.seasons.length > 0) {
+      if (!seasonsData.seasons.includes(currentSeason)) {
+        setCurrentSeason(seasonsData.seasons[0]);
+      }
+    }
+  }, [seasonsData, currentSeason, setCurrentSeason]);
+
+  if (!isLoadingSeasons && (!seasonsData?.seasons || seasonsData.seasons.length === 0 || !currentSeason)) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4 max-w-md mx-auto p-6 bg-card rounded-lg border border-border shadow-sm">
+          <div className="flex justify-center">
+            <Info className="h-12 w-12 text-muted-foreground" />
+          </div>
+          <h2 className="text-2xl font-bold">No Data Available</h2>
+          <p className="text-muted-foreground">
+            The application database is currently empty. Please fetch the latest scraping data.
+          </p>
+          <Link href="/dashboard">
+            <Button className="mt-4">Go to Dashboard to Fetch Data</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

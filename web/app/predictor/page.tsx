@@ -8,10 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTeams, useSeasons } from "@/hooks/use-api";
 import { useAppStore } from "@/hooks/use-app-store";
 import api from "@/lib/api-client";
-import { Basketball, TrendingUp, Users, BarChart3 } from "lucide-react";
+import Link from "next/link";
+import { Dribbble, TrendingUp, Users, BarChart3, MessageSquare } from "lucide-react";
 
 export default function PredictorPage() {
-  const { currentSeason, currentLeague, myTeamId } = useAppStore();
+  const { currentSeason, currentLeague, setCurrentLeague, myTeamId } = useAppStore();
   const [selectedTeamA, setSelectedTeamA] = useState("");
   const [selectedTeamB, setSelectedTeamB] = useState("");
   const [analysis, setAnalysis] = useState<string>("");
@@ -64,6 +65,24 @@ export default function PredictorPage() {
           <div className="flex items-center space-x-3">
             <TrendingUp className="w-8 h-8 text-primary" />
             <h1 className="text-3xl font-bold">Game Predictor</h1>
+          </div>
+          
+          {/* League Toggle */}
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant={currentLeague === "Men" ? "default" : "outline"}
+              onClick={() => setCurrentLeague("Men")}
+              className="w-24"
+            >
+              Men's
+            </Button>
+            <Button
+              variant={currentLeague === "Women" ? "default" : "outline"}
+              onClick={() => setCurrentLeague("Women")}
+              className="w-24"
+            >
+              Women's
+            </Button>
           </div>
         </div>
       </header>
@@ -143,9 +162,9 @@ export default function PredictorPage() {
         {/* Results */}
         {analysis && (
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Basketball className="w-6 h-6" />
+                <Dribbble className="w-6 h-6" />
                 Matchup Analysis
                 {teamA && teamB && (
                   <span className="text-xl font-normal text-muted-foreground">
@@ -153,6 +172,16 @@ export default function PredictorPage() {
                   </span>
                 )}
               </CardTitle>
+              <Link
+                href={`/coach?context=${encodeURIComponent(
+                  `Here is the matchup analysis for ${teamA?.name || "Team A"} vs ${teamB?.name || "Team B"}:\n\n${analysis}`
+                )}`}
+              >
+                <Button variant="outline" size="sm">
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Ask Coach
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="single" className="w-full">
@@ -167,7 +196,7 @@ export default function PredictorPage() {
                   <div className="prose prose-invert max-w-none">
                     {analysis.split("\n").map((line, i) => {
                       if (line.startsWith("#")) {
-                        const headingLevel = (line.match(/^#+/) || [])[0].length;
+                        const headingLevel = (line.match(/^#+/) || [""])[0].length;
                         const text = line.replace(/^#+\s*/, "");
                         const Tag = `h${Math.min(headingLevel, 6)}` as keyof JSX.IntrinsicElements;
                         return (
@@ -210,7 +239,7 @@ export default function PredictorPage() {
                             </li>
                           );
                         }
-                        if (line.trim() === "") return <div className="h-2" />;
+                        if (line.trim() === "") return <div key={i} className="h-2" />;
                         return <p key={i}>{line}</p>;
                       })}
                     </div>

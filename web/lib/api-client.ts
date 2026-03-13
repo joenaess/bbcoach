@@ -17,6 +17,7 @@ import type {
   ScoutRequest,
   ScoutResponse,
   ModelInfoResponse,
+  ScrapingProgress,
 } from "@/types/api";
 
 class ApiClient {
@@ -62,6 +63,16 @@ class ApiClient {
 
   async refreshData(): Promise<{ message: string; status: DataStatusResponse }> {
     const { data } = await this.client.get("/api/data/refresh");
+    return data;
+  }
+
+  async fetchLatestData(): Promise<{ message: string; status: DataStatusResponse }> {
+    const { data } = await this.client.post("/api/data/fetch");
+    return data;
+  }
+
+  async getFetchProgress(): Promise<ScrapingProgress> {
+    const { data } = await this.client.get<ScrapingProgress>("/api/data/fetch-progress");
     return data;
   }
 

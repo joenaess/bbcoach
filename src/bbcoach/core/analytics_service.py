@@ -58,6 +58,10 @@ class AnalyticsService:
 
         top_players = filtered.sort_values(metric, ascending=False).head(limit)
 
+        import numpy as np
+        # Convert NaN values to None directly so JSON encoders handle them gracefully
+        top_players = top_players.replace({np.nan: None})
+
         return top_players.to_dict(orient="records")
 
     def get_team_stats(self, team_id: str, season: int) -> Optional[dict]:
@@ -172,7 +176,7 @@ class AnalyticsService:
             return []
 
         filtered = players_df[players_df["league"] == league]
-        return sorted(filtered["season"].unique().tolist(), reverse=True)
+        return sorted(filtered["season"].dropna().unique().astype(int).tolist(), reverse=True)
 
     def get_available_teams(self, season: int, league: str = "Men") -> list[dict]:
         """Get list of teams for a given season and league."""

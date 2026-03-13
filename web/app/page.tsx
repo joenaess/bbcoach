@@ -1,4 +1,4 @@
-import { Basketball, Home, Users, TrendingUp, MessageSquare, Calendar, GitCompare } from "lucide-react";
+import { Dribbble, Home as HomeIcon, Users, TrendingUp, MessageSquare, Calendar, GitCompare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
@@ -41,7 +41,7 @@ export default function Home() {
       color: "text-pink-500",
     },
     {
-      icon: <Home className="w-8 h-8" />,
+      icon: <HomeIcon className="w-8 h-8" />,
       title: "Dashboard",
       description: "Overview of data and quick access to all features",
       href: "/dashboard",
@@ -55,25 +55,25 @@ export default function Home() {
         {/* Hero Section */}
         <div className="space-y-6">
           <div className="flex items-center justify-center space-x-6">
-            <Basketball className="w-20 h-20 text-primary animate-bounce" />
+            <Dribbble className="w-20 h-20 text-primary animate-bounce" />
             <h1 className="text-7xl font-bold tracking-tight">BBCoach</h1>
           </div>
 
           <p className="text-2xl text-muted-foreground max-w-3xl mx-auto">
-            AI-powered analytics and tactical assistant for the Swedish Basketball League
+            AI-powered analytics and tactical assistant for the Swedish Dribbble League
           </p>
 
           <div className="flex items-center justify-center gap-4">
-            <Button size="lg" className="text-lg px-8" asChild>
-              <Link href="/dashboard">
-                Get Started
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8" asChild>
-              <Link href="/stats">
-                View Statistics
-              </Link>
-            </Button>
+            <Link href="/dashboard">
+              <Button size="lg" className="w-full sm:w-auto h-12 px-8 text-lg">
+                View Dashboards
+              </Button>
+            </Link>
+            <Link href="/coach">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 px-8 text-lg">
+                Ask AI Coach
+              </Button>
+            </Link>
           </div>
         </div>
 

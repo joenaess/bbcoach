@@ -1,9 +1,6 @@
 import chromadb
 from chromadb.utils import embedding_functions
-from sentence_transformers import SentenceTransformer
 import logging
-import os
-
 logger = logging.getLogger(__name__)
 
 

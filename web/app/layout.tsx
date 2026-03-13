@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "BBCoach - Swedish Basketball League AI Coach",
-  description: "AI-powered analytics and tactical assistant for the Swedish Basketball League",
+  title: "BBCoach - Swedish Dribbble League AI Coach",
+  description: "AI-powered analytics and tactical assistant for the Swedish Dribbble League",
 };
 
 export default function RootLayout({

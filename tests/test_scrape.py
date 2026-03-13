@@ -1,6 +1,7 @@
 
 import requests
 from bs4 import BeautifulSoup
+import pytest
 
 def test_scrape():
     url = "https://www.proballers.com/basketball/league/190/sweden-basketligan"
@@ -16,10 +17,16 @@ def test_scrape():
         # Try to find a team or player link to confirm data access
         links = soup.find_all('a', href=True)
         print(f"Found {len(links)} links.")
-        return True
+        print(f"Found {len(links)} links.")
+        assert True
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 403:
+            pytest.skip(f"Skipping due to 403 Forbidden (Anti-bot): {e}")
+        else:
+            assert False, f"HTTP Error: {e}"
     except Exception as e:
         print(f"Failed to scrape: {e}")
-        return False
+        assert False, f"Scrape failed: {e}"
 
 if __name__ == "__main__":
     test_scrape()

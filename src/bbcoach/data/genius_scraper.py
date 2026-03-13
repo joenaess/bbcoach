@@ -55,6 +55,8 @@ class GeniusScraper:
                 if not cells:
                     continue
 
+                player_id = None
+                
                 # Extract Player info from first cell
                 player_cell = cells[0]
                 link_tag = player_cell.find("a")
@@ -175,7 +177,7 @@ class GeniusScraper:
 
         return list(set(player_ids))  # Unique IDs
 
-    def scrape_competition(self, comp_id, season_year, league=None):
+    def scrape_competition(self, comp_id, season_year, league=None, progress_callback=None):
         logger.info(
             f"Scraping competition {comp_id} for season {season_year} ({league})"
         )
@@ -200,7 +202,10 @@ class GeniusScraper:
 
         final_players = []
 
-        for team in teams:
+        for i, team in enumerate(teams, 1):
+            if progress_callback:
+                progress_callback(team["name"], i, len(teams), league)
+                
             logger.info(f"Processing Team: {team['name']} ({team['id']})")
             roster_ids = self.get_team_roster(team["url"])
             logger.info(f"  Found {len(roster_ids)} players in roster.")

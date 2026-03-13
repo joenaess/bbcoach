@@ -8,8 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { useModelInfo, useTeams, useSeasons } from "@/hooks/use-api";
 import { useAppStore } from "@/hooks/use-app-store";
 import api from "@/lib/api-client";
-import { Basketball, Send, MessageSquare, User, Bot, Trash2, Download } from "lucide-react";
-import api from "@/lib/api-client";
+import { Dribbble, Send, MessageSquare, User, Bot, Trash2, Download } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -39,6 +38,16 @@ export default function CoachPage() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const ctx = params.get("context");
+      if (ctx) {
+        setContext(ctx);
+      }
+    }
+  }, []);
+
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
@@ -51,6 +60,8 @@ export default function CoachPage() {
       const response = await api.askCoach({
         question: userMessage,
         context: context,
+        team_id: myTeamId || undefined,
+        season: currentSeason,
       });
 
       setMessages((prev) => [
@@ -133,7 +144,7 @@ export default function CoachPage() {
           <Card className="sticky top-4">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Basketball className="w-5 h-5" />
+                <Dribbble className="w-5 h-5" />
                 Team Context
               </CardTitle>
             </CardHeader>
@@ -142,7 +153,7 @@ export default function CoachPage() {
               <div>
                 <label className="text-sm font-medium mb-2 block">Your Team</label>
                 {myTeam ? (
-                  <Badge variant="default" className="text-sm py-2 px-3">
+                  <Badge variant="secondary" className="text-xs">
                     {myTeam.name}
                   </Badge>
                 ) : (
@@ -302,7 +313,7 @@ export default function CoachPage() {
                 <Button
                   onClick={handleSend}
                   disabled={isLoading || !input.trim()}
-                  size="icon"
+                  size="sm"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />

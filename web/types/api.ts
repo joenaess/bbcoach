@@ -13,9 +13,9 @@ export interface Player {
   APG?: number;
   GP?: number;
   MIN?: number;
-  FG%?: number;
+  "FG%"?: number;
   "3P%"?: number;
-  FT%?: number;
+  "FT%"?: number;
   EFF?: number;
   [key: string]: any;
 }
@@ -55,7 +55,16 @@ export interface DataStatusResponse {
   has_players: boolean;
   has_teams: boolean;
   has_schedule: boolean;
+  last_fetched?: string;
   seasons_in_data: number[];
+}
+
+export interface ScrapingProgress {
+  status: "idle" | "fetching" | "error";
+  current: number;
+  total: number;
+  team: string;
+  league: string;
 }
 
 export interface SeasonsResponse {
@@ -95,6 +104,8 @@ export interface CoachRequest {
   provider?: string;
   api_key?: string;
   model_name?: string;
+  team_id?: string;
+  season?: number;
 }
 
 export interface CoachResponse {

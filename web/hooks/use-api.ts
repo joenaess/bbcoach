@@ -14,7 +14,7 @@ export function useSeasons(league: string = "Men") {
 export function useTeams(season: number | undefined, league: string = "Men") {
   return useSWR(
     season ? `/teams/${season}/${league}` : null,
-    () => (season ? api.getTeams(season, league) : Promise.resolve({ teams: [] }))
+    () => (season ? api.getTeams(season, league) : Promise.resolve({ season: 0, league: "", teams: [] }))
   );
 }
 
@@ -27,7 +27,7 @@ export function useTopPlayers(
   return useSWR(
     season ? `/top-players/${season}/${league}/${metric}` : null,
     () =>
-      season ? api.getTopPlayers(season, league, metric, limit) : Promise.resolve({ players: [] })
+      season ? api.getTopPlayers(season, league, metric, limit) : Promise.resolve({ season: 0, league: "", metric: "", players: [] })
   );
 }
 

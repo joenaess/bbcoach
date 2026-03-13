@@ -22,12 +22,12 @@ class MockStreamlit:
 
 
 sys.modules["streamlit"] = MockStreamlit()
-import streamlit as st
+import streamlit as st  # noqa: E402
 
 # Add src to path
 sys.path.append(os.path.abspath("src"))
 
-from bbcoach.rag.pipeline import RAGPipeline
+from bbcoach.rag.pipeline import RAGPipeline  # noqa: E402
 
 
 def main():

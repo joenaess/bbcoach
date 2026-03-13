@@ -115,6 +115,7 @@ class BasketballCoach:
                 )
                 outputs = self.pipe(
                     prompt,
+                    max_length=None,
                     max_new_tokens=512,
                     do_sample=True,
                     temperature=0.7,

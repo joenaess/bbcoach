@@ -238,6 +238,7 @@ def load_players() -> pd.DataFrame:
 
         return df
 
+    return pd.DataFrame()
 
 def save_schedule(schedule_data: list[dict], filename="schedule.parquet"):
     ensure_data_dir()
