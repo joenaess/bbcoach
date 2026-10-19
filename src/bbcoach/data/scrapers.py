@@ -1,12 +1,12 @@
 import logging
-import sys
 import os
+import sys
 
 # Ensure we can import from bbcoach
 sys.path.append(os.path.abspath("src"))
 
-from bbcoach.data.genius_scraper import GeniusScraper
-from bbcoach.data.storage import save_players, save_teams
+from bbcoach.data.genius_scraper import GeniusScraper  # noqa: E402
+from bbcoach.data.storage import save_players, save_schedule, save_teams  # noqa: E402
 
 # Configure logging to show up in stdout for the UI
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -17,9 +17,10 @@ def scrape_competitions(competitions: list[dict], progress_callback=None) -> tup
     """Helper to run the scraper for specific competitions."""
     logger.info("Starting Genius Sports Scraper...")
     scraper = GeniusScraper()
-    
+
     all_players = []
     all_teams = []
+    all_schedules = []
 
     total_comps = len(competitions)
 
@@ -43,6 +44,13 @@ def scrape_competitions(competitions: list[dict], progress_callback=None) -> tup
                 t["league"] = comp["league"]
             all_teams.extend(teams)
 
+        schedule = scraper.get_schedule(comp["id"])
+        if schedule:
+            for game in schedule:
+                game["season"] = comp["year"]
+                game["league"] = comp["league"]
+            all_schedules.extend(schedule)
+
     logger.info(f"Total Players Scraped: {len(all_players)}")
     logger.info(f"Total Teams Scraped: {len(all_teams)}")
 
@@ -53,6 +61,10 @@ def scrape_competitions(competitions: list[dict], progress_callback=None) -> tup
     if all_teams:
         logger.info("Saving teams...")
         save_teams(all_teams, filename="teams.parquet")
+
+    if all_schedules:
+        logger.info("Saving schedule...")
+        save_schedule(all_schedules, filename="schedule.parquet")
 
     logger.info("Scraping Complete!")
     return len(all_players), len(all_teams)

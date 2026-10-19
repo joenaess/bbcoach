@@ -1,6 +1,7 @@
+from typing import List
+
 import pandas as pd
 import plotly.graph_objects as go
-from typing import List
 
 
 def create_radar_chart(player_stats: pd.DataFrame, metrics: List[str] = None):

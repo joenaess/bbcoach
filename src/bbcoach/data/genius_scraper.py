@@ -1,8 +1,9 @@
-import requests
-from bs4 import BeautifulSoup
 import logging
 import re
 import time
+
+import requests
+from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,10 @@ class GeniusScraper:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                "User-Agent": (
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                )
             }
         )
 
@@ -56,7 +60,7 @@ class GeniusScraper:
                     continue
 
                 player_id = None
-                
+
                 # Extract Player info from first cell
                 player_cell = cells[0]
                 link_tag = player_cell.find("a")
@@ -205,7 +209,7 @@ class GeniusScraper:
         for i, team in enumerate(teams, 1):
             if progress_callback:
                 progress_callback(team["name"], i, len(teams), league)
-                
+
             logger.info(f"Processing Team: {team['name']} ({team['id']})")
             roster_ids = self.get_team_roster(team["url"])
             logger.info(f"  Found {len(roster_ids)} players in roster.")

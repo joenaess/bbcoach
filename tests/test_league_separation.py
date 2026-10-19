@@ -1,14 +1,15 @@
-import unittest
-from unittest.mock import patch
 import os
-import sys
-import pandas as pd
-from pathlib import Path
 import shutil
+import sys
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+import pandas as pd
 
 sys.path.append(os.path.abspath("src"))
-from bbcoach.data.genius_scraper import GeniusScraper
 import bbcoach.data.storage as storage
+from bbcoach.data.genius_scraper import GeniusScraper
 
 
 class TestLeagueSeparation(unittest.TestCase):

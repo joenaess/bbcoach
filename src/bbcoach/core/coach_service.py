@@ -63,14 +63,24 @@ class CoachService:
             "based on the provided statistics and team context."
         )
         full_context = f"{system_persona}\n\n{context}" if context else system_persona
-        
+
         coach = self._get_coach()
         return coach.ask(full_context, question)
 
     def get_model_info(self) -> str:
-        """Get information about the currently active model."""
-        coach = self._get_coach()
-        return coach.get_model_info()
+        """Get information about the currently active model without forcing weight loading."""
+        if self._coach is not None:
+            return self._coach.get_model_info()
+
+        from bbcoach.ai.coach import LOCAL_MODEL_NAME
+
+        if self._provider == "local":
+            return f"Local Model ({LOCAL_MODEL_NAME}) 💻"
+
+        model = self._model_name if self._model_name else "Default"
+        icons = {"gemini": "⚡", "openai": "🧠", "anthropic": "🎭", "local": "💻"}
+        icon = icons.get(self._provider, "🤖")
+        return f"{self._provider.title()} ({model}) {icon}"
 
     def generate_scouting_report(self, opponent_name: str, stats_summary: str) -> str:
         """

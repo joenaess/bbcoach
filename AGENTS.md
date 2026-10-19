@@ -1,41 +1,56 @@
 # AGENTS.md - Development Guidelines for BBCoach
 
-This file provides essential information for agentic coding assistants working in this repository.
+## Architecture
 
-## Build, Lint, and Test Commands
+Full-stack application: **Next.js 14.1 frontend** + **FastAPI backend** + **Python 3.13 services**
 
-### Dependencies
+- Frontend: `web/` (Next.js, TypeScript, Tailwind, SWR, Zustand)
+- Backend API: `api/main.py` (FastAPI with 16 REST endpoints)
+- Core Services: `src/bbcoach/core/` (CoachService, AnalyticsService, DataService)
+- Data/AI: `src/bbcoach/data/`, `src/bbcoach/ai/`, `src/bbcoach/rag/`
+
+## Development Commands
+
+### Initial Setup
 ```bash
-uv sync                    # Install project dependencies
+./setup.sh                    # One-time setup (both backend + frontend)
 ```
 
-### Linting
+### Backend (FastAPI)
 ```bash
-uv run ruff check          # Run linter
-uv run ruff check --fix    # Auto-fix linting issues
+./start-api.sh                # Start development server (auto-reload)
+# or manually:
+uv run uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+### Frontend (Next.js)
+```bash
+cd web && npm run dev         # Start dev server on localhost:3000
+cd web && npm run build       # Production build
+cd web && npm run lint        # Frontend linting
 ```
 
 ### Testing
 ```bash
-uv run pytest                      # Run all tests
-uv run pytest -v                   # Run tests with verbose output
-uv run pytest tests/test_storage.py::test_save_and_load_teams    # Run single test
-uv run pytest tests/ -k "save"     # Run tests matching pattern
+uv run pytest                 # Run all unit & API tests (33 tests)
+uv run pytest -v              # Verbose output
+uv run pytest -m integration  # Run live external network integration tests
+uv run pytest tests/test_storage.py::test_save_and_load_teams  # Single test
+uv run pytest tests/ -k "save"  # Tests matching pattern
 ```
 
-### Running the Application
+### Linting
 ```bash
-uv run streamlit run app.py                    # Launch Streamlit app
-uv run python src/bbcoach/data/scrapers.py    # Run scraper manually
+uv run ruff check             # Check Python code
+uv run ruff check --fix       # Auto-fix issues
 ```
 
 ## Code Style Guidelines
 
 ### Python Version and Tooling
-- Python 3.13+ required
+- Python 3.13 required (specified in .python-version)
 - Uses `uv` for package management (not pip)
-- Ruff for linting (configured in pyproject.toml dev dependencies)
-- Pytest for testing
+- Ruff for linting, Pytest for testing
 
 ### Imports
 - Standard library imports first, then third-party, then local (`from bbcoach.*`)
@@ -79,18 +94,18 @@ uv run python src/bbcoach/data/scrapers.py    # Run scraper manually
 - Add test files to `tests/` directory, named `test_*.py`
 - Import test modules without `bbcoach.` prefix when path is added
 - Test function names: `test_` prefix describing what is tested
+- API tests: Add both `sys.path.append(os.path.abspath("src"))` and `sys.path.append(os.path.abspath("."))` to import FastAPI app
+- API tests mock DataService methods to avoid requiring existing Parquet files
 
 ### File Organization
 - `src/bbcoach/` - Main source code
 - `src/bbcoach/data/` - Data scrapers, storage, analytics
 - `src/bbcoach/ai/` - AI/coach implementation
 - `src/bbcoach/rag/` - RAG pipeline, vector store
-- `src/bbcoach/ui/` - Streamlit UI components
 - `tests/` - All test files
 - `data_storage/` - Parquet data files (automated)
 
 ### Logging and Print Statements
-- Use `print()` for user-facing output in the Streamlit app
 - Use `logging` for backend modules (setup with `logger = logging.getLogger(__name__)`)
 - Print progress for long-running operations (e.g., scrapers: "Processing Team X/Y")
 
@@ -100,17 +115,15 @@ uv run python src/bbcoach/data/scrapers.py    # Run scraper manually
 - Required keys: `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` (optional for local model)
 
 ### Key Dependencies
-- Streamlit for UI
-- Pandas for data manipulation
-- PyArrow/Parquet for data storage
 - Playwright for web scraping
+- PyArrow/Parquet for data storage
 - ChromaDB for vector storage
 - Transformers/PyTorch for local AI models
 - Multiple AI providers: Google Gemini, OpenAI, Anthropic, local Qwen
 
 ### Important Notes
 - Local AI model (Qwen 2.5-1.5B) used as fallback when no API key provided
-- Scrapers fetch basketball stats from Proballers.com
+- Scrapers fetch basketball stats from Genius Sports
 - RAG system scrapes BreakthroughBasketball.com for drills
 - Support both Men's and Women's leagues
 - Data includes players, teams, schedules across multiple seasons (2021-2025)

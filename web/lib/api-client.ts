@@ -108,13 +108,31 @@ class ApiClient {
 
   async getTeamStats(teamId: string, season: number): Promise<TeamStats | null> {
     try {
-      const { data } = await this.client.get<TeamStats>(`/api/stats/team/${teamId}`, {
-        params: { season },
-      });
-      return data;
+      const { data } = await this.client.get<{ team_id: string; season: number; stats: TeamStats }>(
+        `/api/stats/team/${teamId}`,
+        {
+          params: { season },
+        }
+      );
+      return data.stats ?? (data as unknown as TeamStats);
     } catch (error) {
       console.error(`Failed to get team stats for ${teamId}:`, error);
       return null;
+    }
+  }
+
+  async getTeamSchedule(teamId: string, season?: number): Promise<any[]> {
+    try {
+      const { data } = await this.client.get<{ team_id: string; season?: number; schedule: any[] }>(
+        `/api/stats/schedule/${teamId}`,
+        {
+          params: season ? { season } : undefined,
+        }
+      );
+      return data.schedule || [];
+    } catch (error) {
+      console.error(`Failed to get team schedule for ${teamId}:`, error);
+      return [];
     }
   }
 

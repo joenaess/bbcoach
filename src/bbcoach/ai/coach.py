@@ -1,25 +1,34 @@
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+import logging
+from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 # Local Model Fallback
 LOCAL_MODEL_NAME = "Qwen/Qwen2.5-1.5B-Instruct"
 
 
 class BasketballCoach:
-    def __init__(self, provider="local", api_key=None, model_name=None):
+    def __init__(
+        self,
+        provider: str = "local",
+        api_key: Optional[str] = None,
+        model_name: Optional[str] = None,
+    ):
         self.provider = provider
         self.api_key = api_key
         self.model_name = model_name
         self.model = None
         self.client = None
+        self.tokenizer = None
+        self.pipe = None
 
-        print(
+        logger.info(
             f"Initializing Coach with provider: {self.provider}, model: {self.model_name}"
         )
 
         self._setup_provider()
 
-    def _setup_provider(self):
+    def _setup_provider(self) -> None:
         try:
             if self.provider == "gemini":
                 from google import genai
@@ -51,13 +60,16 @@ class BasketballCoach:
                 self._setup_local()
 
         except Exception as e:
-            print(f"Error initializing {self.provider}: {e}. Falling back to Local.")
+            logger.warning(f"Error initializing {self.provider}: {e}. Falling back to Local.")
             self.provider = "local"
             self._setup_local()
 
-    def _setup_local(self):
+    def _setup_local(self) -> None:
+        import torch
+        from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+
         device = "cuda" if torch.cuda.is_available() else "cpu"
-        print(f"Loading local model {LOCAL_MODEL_NAME} on {device}...")
+        logger.info(f"Loading local model {LOCAL_MODEL_NAME} on {device}...")
         self.tokenizer = AutoTokenizer.from_pretrained(LOCAL_MODEL_NAME)
         self.model = AutoModelForCausalLM.from_pretrained(
             LOCAL_MODEL_NAME,

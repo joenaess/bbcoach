@@ -1,7 +1,7 @@
 [project]
 name = "bbcoach"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI-powered basketball coaching analytics and tactical assistant"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -10,6 +10,7 @@ dependencies = [
     "anthropic>=0.79.0",
     "beautifulsoup4>=4.14.3",
     "chromadb>=1.5.0",
+    "fastapi>=0.135.1",
     "google-genai>=0.1.0",
     "openai>=2.17.0",
     "orjson>=3.11.7",
@@ -17,21 +18,50 @@ dependencies = [
     "playwright>=1.58.0",
     "plotly>=6.0.0",
     "pyarrow>=23.0.0",
+    "pydantic-settings>=2.13.1",
     "pypdf>=6.7.0",
-    "pytest-playwright>=0.7.2",
     "python-dotenv>=1.2.1",
+    "python-multipart>=0.0.22",
     "requests>=2.32.5",
     "sentence-transformers>=5.2.2",
     "streamlit>=1.41.0",
     "torch>=2.10.0",
     "transformers>=5.1.0",
+    "uvicorn>=0.40.0",
 ]
 
 [dependency-groups]
 dev = [
-    "fastapi>=0.135.1",
-    "pydantic-settings>=2.13.1",
-    "python-multipart>=0.0.22",
+    "httpx>=0.28.0",
+    "pytest>=8.0.0",
+    "pytest-playwright>=0.7.2",
     "ruff>=0.15.0",
-    "uvicorn>=0.40.0",
 ]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 120
+src = ["src", "api", "tests"]
+extend-exclude = [
+    "app.py",
+    "check_*.py",
+    "debug_*.py",
+    "find_*.py",
+    "inspect_*.py",
+    "populate_*.py",
+    "run_genius_scraper*.py",
+    "scrape_missing.py",
+    "verify_*.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+testpaths = ["tests"]
+markers = [
+    "integration: marks tests that require live external network calls (deselect with '-m \"not integration\"')",
+]
+addopts = "-m 'not integration'"
+

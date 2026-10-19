@@ -1,7 +1,7 @@
-import unittest
-from unittest.mock import patch
 import os
 import sys
+import unittest
+from unittest.mock import patch
 
 sys.path.append(os.path.abspath("src"))
 from bbcoach.data.genius_scraper import GeniusScraper

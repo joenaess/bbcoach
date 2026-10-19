@@ -3,8 +3,8 @@ Data Service
 
 Abstraction layer over data storage operations.
 """
-import logging
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -14,8 +14,12 @@ import pandas as pd
 from bbcoach.config import settings
 from bbcoach.data.storage import (
     load_players as storage_load_players,
-    load_teams as storage_load_teams,
+)
+from bbcoach.data.storage import (
     load_schedule as storage_load_schedule,
+)
+from bbcoach.data.storage import (
+    load_teams as storage_load_teams,
 )
 
 logger = logging.getLogger(__name__)
@@ -60,11 +64,11 @@ class DataService:
         """Update the last_fetched timestamp in metadata."""
         if not self.data_dir.exists():
             self.data_dir.mkdir(parents=True)
-            
+
         meta_path = self.data_dir / "metadata.json"
         metadata = self.get_metadata()
         metadata["last_fetched"] = datetime.now().isoformat()
-        
+
         try:
             with open(meta_path, "w") as f:
                 json.dump(metadata, f, indent=2)
@@ -84,7 +88,7 @@ class DataService:
         if use_cache and not self._players_cache.empty:
             return self._players_cache
 
-        df = storage_load_players()
+        df = storage_load_players(data_dir=self.data_dir)
         self._players_cache = df
         return df
 
@@ -101,7 +105,7 @@ class DataService:
         if use_cache and not self._teams_cache.empty:
             return self._teams_cache
 
-        df = storage_load_teams()
+        df = storage_load_teams(data_dir=self.data_dir)
         self._teams_cache = df
         return df
 
@@ -118,7 +122,7 @@ class DataService:
         if use_cache and not self._schedule_cache.empty:
             return self._schedule_cache
 
-        df = storage_load_schedule()
+        df = storage_load_schedule(data_dir=self.data_dir)
         self._schedule_cache = df
         return df
 

@@ -207,36 +207,38 @@ You need two terminal windows:
 
 ### 7. Schedule (`/schedule`)
 - Team selector
-- View team roster
-- Player statistics display
-- Key player identification
+- View team game schedule (opponent, home/away, date, result)
+- Fallback to team rotation & key player statistics when schedule data is pending
 
 ---
 
 ## 📡 API Documentation
 
-### Available Endpoints
+### Available Endpoints (16 REST Routes)
 
 **Health & Data:**
 - `GET /health` - Health check
-- `GET /api/data/status` - Data file status
+- `GET /api/data/status` - Data file status and last-fetched timestamp
 - `GET /api/data/refresh` - Clear and reload data cache
+- `POST /api/data/fetch` - Trigger background Genius Sports data & schedule scraping
+- `GET /api/data/fetch-progress` - Poll live background scraping progress
 
 **Statistics:**
-- `GET /api/stats/seasons` - Get available seasons
-- `GET /api/stats/teams` - Get teams for season
+- `GET /api/stats/seasons` - Get available seasons for a league
+- `GET /api/stats/teams` - Get teams for a season and league
 - `GET /api/stats/top-players` - Get top players by metric
-- `GET /api/stats/team/{team_id}` - Get team statistics
-- `POST /api/stats/compare-players` - Compare multiple players
+- `GET /api/stats/team/{team_id}` - Get aggregated team statistics and rotation
+- `GET /api/stats/schedule/{team_id}` - Get team game schedule
+- `POST /api/stats/compare-players` - Compare multiple players side-by-side
 
 **Analytics:**
 - `POST /api/analytics/predict-matchup` - Predict matchup (single season)
 - `POST /api/analytics/predict-matchup-multi-season` - Predict matchup (multi-season)
 
 **Coach (AI):**
-- `POST /api/coach/ask` - Ask the AI coach a question
-- `POST /api/coach/scouting-report` - Generate scouting report
-- `GET /api/coach/model-info` - Get current model information
+- `POST /api/coach/ask` - Ask the AI coach a question (with optional team/season context)
+- `POST /api/coach/scouting-report` - Generate an opponent scouting report
+- `GET /api/coach/model-info` - Get current AI model information
 
 Interactive API documentation is available at http://localhost:8000/docs
 
@@ -269,17 +271,17 @@ SCRAPER_DELAY=1.0
 
 ### AI Provider Priority
 
-The app will use the first available API key in this order:
+The app will use the configured provider in `Settings` (or per-request override):
 1. Gemini (if `GEMINI_API_KEY` is set)
 2. OpenAI (if `OPENAI_API_KEY` is set)
 3. Anthropic (if `ANTHROPIC_API_KEY` is set)
-4. Local Qwen model (automatic fallback)
+4. Local Qwen 2.5-1.5B model (automatic fallback, lazy-loaded on first inference)
 
 ### Data Configuration
 
-- **Data Directory**: `data_storage/` (Parquet files)
+- **Data Directory**: `data_storage/` (Parquet files: `players.parquet`, `teams.parquet`, `schedule.parquet`, `metadata.json`)
 - **Vector DB**: `.vectordb/` (ChromaDB)
-- **Competitions**: Configured in `src/bbcoach/config/settings.py`
+- **Competitions**: Configured in `src/bbcoach/config/settings.py` and `src/bbcoach/data/scrapers.py`
 
 ---
 
@@ -287,27 +289,36 @@ The app will use the first available API key in this order:
 
 ### Running Tests
 
+Tests are configured in `pyproject.toml` and isolated from `data_storage/` using temporary directories and mocks.
+
 ```bash
-# Run all tests
+# Run all unit and API tests (33 tests; excludes live external network tests by default)
 uv run pytest
 
 # Run with verbose output
 uv run pytest -v
 
-# Run specific test
+# Run live network integration tests explicitly
+uv run pytest -m integration
+
+# Run specific test file or test case
+uv run pytest tests/test_api.py
+uv run pytest tests/test_services_and_analysis.py
 uv run pytest tests/test_storage.py::test_save_and_load_teams
 
 # Run tests matching pattern
-uv run pytest tests/ -k "save"
+uv run pytest tests/ -k "matchup"
 ```
 
 ### Linting
 
+Ruff is configured in `pyproject.toml` (`target-version = "py313"`, `line-length = 120`, rules `E`, `F`, `W`, `I`):
+
 ```bash
-# Check code
+# Check Python code
 uv run ruff check
 
-# Auto-fix issues
+# Auto-fix linting and import sorting issues
 uv run ruff check --fix
 ```
 

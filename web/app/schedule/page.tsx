@@ -33,9 +33,16 @@ export default function SchedulePage() {
   const loadSchedule = async (teamId: string) => {
     setIsLoading(true);
     try {
+      const games = await api.getTeamSchedule(teamId, currentSeason);
+      if (games && games.length > 0) {
+        setSchedule(games);
+        return;
+      }
       const data = await api.getTeamStats(teamId, currentSeason);
       if (data && data.rotation) {
         setSchedule(data.rotation);
+      } else {
+        setSchedule([]);
       }
     } catch (error) {
       console.error("Error loading schedule:", error);
@@ -122,6 +129,39 @@ export default function SchedulePage() {
 }
 
 function ScheduleItem({ game }: { game: any }) {
+  if (game.opponent) {
+    return (
+      <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent transition-colors">
+        <div className="flex items-center space-x-4 flex-1">
+          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            {game.home_away === "Home" ? (
+              <Home className="w-6 h-6" />
+            ) : (
+              <Plane className="w-6 h-6" />
+            )}
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold">
+              {game.home_away === "Home" ? "vs" : "@"} {game.opponent}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {game.date} • {game.home_away}
+            </div>
+          </div>
+        </div>
+        <Badge variant={game.result === "Scheduled" ? "secondary" : "default"}>
+          {game.result || "Scheduled"}
+        </Badge>
+      </div>
+    );
+  }
+
+  const ppg = game.PPG ?? game.ppg ?? 0;
+  const rpg = game.RPG ?? game.rpg ?? 0;
+  const apg = game.APG ?? game.apg ?? 0;
+  const gp = game.GP ?? game.gp ?? 0;
+  const min = game.MIN ?? game.min ?? 0;
+
   return (
     <div className="flex items-center justify-between p-4 rounded-lg border border-border hover:bg-accent transition-colors">
       <div className="flex items-center space-x-4 flex-1">
@@ -134,30 +174,30 @@ function ScheduleItem({ game }: { game: any }) {
         <div className="flex-1">
           <div className="font-semibold">{game.name || "Player"}</div>
           <div className="text-sm text-muted-foreground">
-            Game {game.GP || 0} • {game.MIN || 0} minutes played
+            Games: {gp} • {min} minutes played
           </div>
         </div>
 
         {/* Metrics */}
-        <div className="flex gap-4 text-right">
+        <div className="flex gap-4 text-right mr-4">
           <div>
-            <div className="text-lg font-bold">{game.PPG || 0}</div>
+            <div className="text-lg font-bold">{ppg}</div>
             <div className="text-xs text-muted-foreground">PPG</div>
           </div>
           <div>
-            <div className="text-lg font-bold">{game.RPG || 0}</div>
+            <div className="text-lg font-bold">{rpg}</div>
             <div className="text-xs text-muted-foreground">RPG</div>
           </div>
           <div>
-            <div className="text-lg font-bold">{game.APG || 0}</div>
+            <div className="text-lg font-bold">{apg}</div>
             <div className="text-xs text-muted-foreground">APG</div>
           </div>
         </div>
       </div>
 
       {/* Result Badge */}
-      <Badge variant={game.PPG > 15 ? "default" : "secondary"}>
-        {game.PPG > 15 ? "Key Player" : "Bench"}
+      <Badge variant={ppg > 15 ? "default" : "secondary"}>
+        {ppg > 15 ? "Key Player" : "Rotation"}
       </Badge>
     </div>
   );

@@ -1,8 +1,9 @@
-import requests
-from bs4 import BeautifulSoup, NavigableString, Tag, Comment
 import logging
 import re
 from urllib.parse import urljoin
+
+import requests
+from bs4 import BeautifulSoup, Comment, NavigableString, Tag
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +15,10 @@ class BreakthroughScraper:
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                "User-Agent": (
+                    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+                )
             }
         )
 

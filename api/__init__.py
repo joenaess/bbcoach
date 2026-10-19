@@ -1,8 +1,8 @@
 """
 API Package for BBCoach
 """
-import sys
 import os
+import sys
 
 # Add src to path for imports
 sys.path.append(os.path.abspath("../src"))

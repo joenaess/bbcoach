@@ -37,17 +37,36 @@ def get_team_aggregates(players_df, team_id, season):
         try:
             # Use direct columns if available (Genius Scraper)
             if "PPG" in row:
+                ppg = float(row.get("PPG", 0.0))
+                rpg = float(row.get("RPG", 0.0))
+                apg = float(row.get("APG", 0.0))
+                gp = float(row.get("GP", 0.0))
+                mins = float(row.get("MIN", 0.0))
+                fg_pct = float(row.get("FG%", 0.0))
+                three_p_pct = float(row.get("3P%", 0.0))
+                to = float(row.get("TO", 0.0))
+                eff = float(row.get("EFF", 0.0))
                 p_stats = {
-                    "name": row.get("name", "").strip(),
-                    "ppg": float(row.get("PPG", 0.0)),
-                    "rpg": float(row.get("RPG", 0.0)),
-                    "apg": float(row.get("APG", 0.0)),
-                    "gp": float(row.get("GP", 0.0)),
-                    "min": float(row.get("MIN", 0.0)),
-                    "fg_pct": float(row.get("FG%", 0.0)),
-                    "3p_pct": float(row.get("3P%", 0.0)),
-                    "to": float(row.get("TO", 0.0)),
-                    "eff": float(row.get("EFF", 0.0)),
+                    "id": str(row.get("id", "")),
+                    "name": str(row.get("name", "")).strip(),
+                    "ppg": ppg,
+                    "rpg": rpg,
+                    "apg": apg,
+                    "gp": gp,
+                    "min": mins,
+                    "fg_pct": fg_pct,
+                    "3p_pct": three_p_pct,
+                    "to": to,
+                    "eff": eff,
+                    "PPG": ppg,
+                    "RPG": rpg,
+                    "APG": apg,
+                    "GP": gp,
+                    "MIN": mins,
+                    "FG%": fg_pct,
+                    "3P%": three_p_pct,
+                    "TO": to,
+                    "EFF": eff,
                 }
                 parsed_players.append(p_stats)
             else:
@@ -141,15 +160,35 @@ def predict_matchup(players_df, team_a_id, team_b_id, season):
             f"{label}: {p_a['name']} ({ex_a}) vs {p_b['name']} ({ex_b}) -> Edge: {edge}"
         )
 
+    line_a = (
+        f"Your Team: {stats_a['total_ppg']:.1f} PPG | {stats_a['total_rpg']:.1f} RPG | "
+        f"{stats_a['total_apg']:.1f} APG | {stats_a['avg_3p_pct']:.1f}% 3P"
+    )
+    line_b = (
+        f"Opponent : {stats_b['total_ppg']:.1f} PPG | {stats_b['total_rpg']:.1f} RPG | "
+        f"{stats_b['total_apg']:.1f} APG | {stats_b['avg_3p_pct']:.1f}% 3P"
+    )
+    three_note = (
+        "You shoot better from deep."
+        if stats_a["avg_3p_pct"] > stats_b["avg_3p_pct"]
+        else "Opponent has better shooters."
+    )
+    to_note = (
+        "Your team protects the ball better."
+        if stats_a["total_to"] < stats_b["total_to"]
+        else "Opponent calculates fewer turnovers."
+    )
+    adv_note = "Advantage You" if diff_ppg > 0 else "Advantage Opponent"
+
     analysis = f"""
     DEEP MATCHUP ANALYSIS (Season {season})
     ======================================
     Team Comparison (Rotation of Top 8):
-    Your Team: {stats_a["total_ppg"]:.1f} PPG | {stats_a["total_rpg"]:.1f} RPG | {stats_a["total_apg"]:.1f} APG | {stats_a["avg_3p_pct"]:.1f}% 3P
-    Opponent : {stats_b["total_ppg"]:.1f} PPG | {stats_b["total_rpg"]:.1f} RPG | {stats_b["total_apg"]:.1f} APG | {stats_b["avg_3p_pct"]:.1f}% 3P
+    {line_a}
+    {line_b}
 
     Projected Outcome:
-    Scoring Differential: {diff_ppg:+.1f} points ({"Advantage You" if diff_ppg > 0 else "Advantage Opponent"})
+    Scoring Differential: {diff_ppg:+.1f} points ({adv_note})
 
     Key Individual Matchups:
     1. {get_matchup("Scorer", "ppg", "Top Scorer")}
@@ -157,8 +196,8 @@ def predict_matchup(players_df, team_a_id, team_b_id, season):
     3. {get_matchup("Rebounder", "rpg", "Paint/Reb")}
 
     Tactical Notes:
-    - 3-Point Threat: {"You shoot better from deep." if stats_a["avg_3p_pct"] > stats_b["avg_3p_pct"] else "Opponent has better shooters."}
-    - Ball Security: {"Your team protects the ball better." if stats_a["total_to"] < stats_b["total_to"] else "Opponent calculates fewer turnovers."}
+    - 3-Point Threat: {three_note}
+    - Ball Security: {to_note}
     """
 
     # 2. Projected Lineups (Top 5 by Minutes)
@@ -182,7 +221,7 @@ def predict_matchup(players_df, team_a_id, team_b_id, season):
     ============================
     Your Starters: {format_lineup(starters_a)}
     Your Key Bench: {format_lineup(bench_a)}
-    
+
     Opponent Starters: {format_lineup(starters_b)}
     Opponent Key Bench: {format_lineup(bench_b)}
     """
@@ -193,7 +232,10 @@ def predict_matchup(players_df, team_a_id, team_b_id, season):
         roster_str += "Name | PPG | RPG | APG | FG% | 3P% | TO\n"
         roster_str += "--- | --- | --- | --- | --- | --- | ---\n"
         for p in team_rotation:
-            roster_str += f"{p['name']} | {p['ppg']} | {p['rpg']} | {p['apg']} | {p['fg_pct']}% | {p['3p_pct']}% | {p['to']}\n"
+            roster_str += (
+                f"{p['name']} | {p['ppg']} | {p['rpg']} | {p['apg']} | "
+                f"{p['fg_pct']}% | {p['3p_pct']}% | {p['to']}\n"
+            )
         return roster_str
 
     analysis += format_full_roster(stats_a["rotation"], "YOUR TEAM")
@@ -247,16 +289,19 @@ def predict_matchup_multi_season(players_df, team_a_id, team_b_id):
         return "Insufficient historical data for multi-season prediction."
 
     diff_ppg = stats_a["total_ppg"] - stats_b["total_ppg"]
+    favored = "Your Team" if diff_ppg > 0 else "Opponent"
 
     analysis = (
         f"MULTI-SEASON TREND ANALYSIS (2021-2025)\n"
         f"=======================================\n"
         f"Historical Team Potentials (Avg per Season):\n"
-        f"Your Team: {stats_a['total_ppg']:.1f} PPG | {stats_a['total_rpg']:.1f} RPG | {stats_a['total_apg']:.1f} APG | {stats_a['avg_3p_pct']:.1f}% 3P\n"
-        f"Opponent : {stats_b['total_ppg']:.1f} PPG | {stats_b['total_rpg']:.1f} RPG | {stats_b['total_apg']:.1f} APG | {stats_b['avg_3p_pct']:.1f}% 3P\n"
+        f"Your Team: {stats_a['total_ppg']:.1f} PPG | {stats_a['total_rpg']:.1f} RPG | "
+        f"{stats_a['total_apg']:.1f} APG | {stats_a['avg_3p_pct']:.1f}% 3P\n"
+        f"Opponent : {stats_b['total_ppg']:.1f} PPG | {stats_b['total_rpg']:.1f} RPG | "
+        f"{stats_b['total_apg']:.1f} APG | {stats_b['avg_3p_pct']:.1f}% 3P\n"
         f"\n"
         f"Historical Edge:\n"
         f"Scoring: {'You' if diff_ppg > 0 else 'Opponent'} ({abs(diff_ppg):.1f} PPG)\n"
-        f"Modeling suggests consistent performance trends favor {'Your Team' if diff_ppg > 0 else 'Opponent'}.\n"
+        f"Modeling suggests consistent performance trends favor {favored}.\n"
     )
     return analysis

@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 sys.path.append(os.path.abspath("src"))
 
@@ -27,7 +27,7 @@ html = """
 def test_breakthrough_scraper_parse():
     scraper = BreakthroughScraper()
     result = scraper.parse_page(html, "http://test.com")
-    
+
     assert result["title"] is not None
     assert " الدفاع" not in result["content"]  # just check it successfully parses
     assert "Copyright 2024" not in result["content"] # Check footer was ignored

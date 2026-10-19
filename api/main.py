@@ -3,25 +3,23 @@ FastAPI Backend for BBCoach
 
 RESTful API providing endpoints for the basketball coaching application.
 """
-import sys
-import os
-
-# Add src to path
-sys.path.append(os.path.abspath("src"))
-
 import logging
+import os
+import sys
 from contextlib import asynccontextmanager
 from typing import Optional
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Query, BackgroundTasks
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
 from pydantic import BaseModel
 
-from bbcoach.config import settings
-from bbcoach.core import CoachService, AnalyticsService, DataService
-from bbcoach.data.scrapers import main as scrape_all
+# Add src to path
+sys.path.append(os.path.abspath("src"))
+
+from bbcoach.config import settings  # noqa: E402
+from bbcoach.core import AnalyticsService, CoachService, DataService  # noqa: E402
+from bbcoach.data.scrapers import main as scrape_all  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +68,9 @@ scraping_progress = {
     "current": 0,
     "total": 0,
     "team": "",
-    "league": ""
-} 
+    "league": "",
+}
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -97,7 +96,7 @@ async def lifespan(app: FastAPI):
 # Create FastAPI app
 app = FastAPI(
     title="BBCoach API",
-    description="AI-powered basketball coaching analytics平台",
+    description="AI-powered basketball coaching analytics platform",
     version="2.0.0",
     lifespan=lifespan,
 )
@@ -138,18 +137,21 @@ async def refresh_data_cache():
 async def fetch_latest_data(background_tasks: BackgroundTasks):
     """Run the scraper in the background and return immediately."""
     global scraping_progress
-    
+
     if scraping_progress["status"] == "fetching":
-        return {"message": "Scraping is already in progress.", "status": data_service.get_data_status()}
+        return {
+            "message": "Scraping is already in progress.",
+            "status": data_service.get_data_status(),
+        }
 
     scraping_progress = {
         "status": "fetching",
         "current": 0,
         "total": 0,
         "team": "Initializing...",
-        "league": "Starting"
+        "league": "Starting",
     }
-    
+
     def update_progress(team_name, current_idx, total_count, league_name):
         scraping_progress["current"] = current_idx
         scraping_progress["total"] = total_count
@@ -158,7 +160,7 @@ async def fetch_latest_data(background_tasks: BackgroundTasks):
 
     def run_scraper_task():
         try:
-            players_count, teams_count = scrape_all(progress_callback=update_progress)
+            scrape_all(progress_callback=update_progress)
             data_service.update_metadata()
             data_service.clear_cache()  # Force reload from disk
             scraping_progress["status"] = "idle"
@@ -167,16 +169,18 @@ async def fetch_latest_data(background_tasks: BackgroundTasks):
             logger.error(f"Error fetching data: {e}", exc_info=True)
 
     background_tasks.add_task(run_scraper_task)
-    
+
     return {
         "message": "Scraping started in background.",
-        "status": data_service.get_data_status()
+        "status": data_service.get_data_status(),
     }
+
 
 @app.get("/api/data/fetch-progress")
 async def get_fetch_progress():
     """Return the current data scraping execution progress."""
     return scraping_progress
+
 
 # Stats endpoints
 @app.get("/api/stats/seasons")
@@ -196,7 +200,7 @@ async def get_teams(
     return {"season": season, "league": league, "teams": teams}
 
 
-@app.get("/api/stats/top-players", response_class=ORJSONResponse)
+@app.get("/api/stats/top-players")
 async def get_top_players(
     season: int, league: str = "Men", metric: str = "PPG", limit: int = 10
 ):
@@ -205,13 +209,22 @@ async def get_top_players(
     return {"season": season, "league": league, "metric": metric, "players": players}
 
 
-@app.get("/api/stats/team/{team_id}", response_class=ORJSONResponse)
+@app.get("/api/stats/team/{team_id}")
 async def get_team_stats(team_id: str, season: int = Query(...)):
     """Get team statistics."""
     stats = analytics_service.get_team_stats(team_id, season)
     if stats is None:
         raise HTTPException(status_code=404, detail="Team not found")
     return {"team_id": team_id, "season": season, "stats": stats}
+
+
+@app.get("/api/stats/schedule/{team_id}")
+async def get_team_schedule(
+    team_id: str, season: Optional[int] = Query(None, description="Optional season filter")
+):
+    """Get schedule for a specific team."""
+    schedule = analytics_service.get_team_schedule(team_id, season)
+    return {"team_id": team_id, "season": season, "schedule": schedule}
 
 
 @app.post("/api/stats/compare-players")

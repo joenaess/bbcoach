@@ -43,19 +43,27 @@ Once the server is running:
 
 ## API Endpoints
 
-### Health & Status
+### Health & Data
 
 **GET** `/health`
 - Returns: `{"status": "healthy", "service": "bbcoach-api"}`
 - Purpose: Health check for load balancers and monitoring
 
 **GET** `/api/data/status`
-- Returns: Data status with player/team/schedule counts
+- Returns: Data status with player/team/schedule counts and `last_fetched` timestamp
 - Purpose: Check data availability and freshness
 
 **GET** `/api/data/refresh`
 - Returns: Clear cache and reload all data
 - Purpose: Manual data refresh trigger
+
+**POST** `/api/data/fetch`
+- Returns: Starts background scraping of Genius Sports competitions (players, teams, schedule)
+- Purpose: Trigger asynchronous data refresh from the UI
+
+**GET** `/api/data/fetch-progress`
+- Returns: `{ "status": "idle" | "fetching" | "error", "current": 0, "total": 0, "team": "", "league": "" }`
+- Purpose: Poll live progress while background scraping is running
 
 ### Statistics
 
@@ -76,8 +84,13 @@ Once the server is running:
 
 **GET** `/api/stats/team/{team_id}`
 - Query params: `season`
-- Returns: Team statistics and roster
+- Returns: Team statistics and rotation
 - Purpose: Detailed team analysis
+
+**GET** `/api/stats/schedule/{team_id}`
+- Query params: `season` (optional)
+- Returns: Team schedule games (`date`, `opponent`, `result`, `home_away`)
+- Purpose: Team game schedule view
 
 **POST** `/api/stats/compare-players`
 - Body: `{ "player_names": [...], "season": 2025, "league": "Men" }`
@@ -99,7 +112,7 @@ Once the server is running:
 ### Coach (AI)
 
 **POST** `/api/coach/ask`
-- Body: `{ "question": "...", "context": "...", "provider": "optional" }`
+- Body: `{ "question": "...", "context": "...", "provider": "optional", "team_id": "optional", "season": 2025 }`
 - Returns: AI coach response with model info
 - Purpose: Interactive coaching chat
 
@@ -254,10 +267,10 @@ curl -X POST http://localhost:8000/api/coach/ask \
   -d '{"question":"What defense should we run?","context":""}'
 ```
 
-### Using the Test Script
+### Running Automated API Tests
 
 ```bash
-python test_api.py
+uv run pytest tests/test_api.py -v
 ```
 
 ## Performance

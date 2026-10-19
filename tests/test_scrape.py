@@ -1,32 +1,35 @@
-
+import pytest
 import requests
 from bs4 import BeautifulSoup
-import pytest
 
+
+@pytest.mark.integration
 def test_scrape():
     url = "https://www.proballers.com/basketball/league/190/sweden-basketligan"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            "(KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        )
     }
     try:
         response = requests.get(url, headers=headers, timeout=10)
         response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'html.parser')
+        soup = BeautifulSoup(response.text, "html.parser")
         title = soup.title.text
         print(f"Successfully scraped: {title}")
-        # Try to find a team or player link to confirm data access
-        links = soup.find_all('a', href=True)
+        links = soup.find_all("a", href=True)
         print(f"Found {len(links)} links.")
-        print(f"Found {len(links)} links.")
-        assert True
+        assert len(links) >= 0
     except requests.exceptions.HTTPError as e:
-        if e.response.status_code == 403:
+        if e.response is not None and e.response.status_code == 403:
             pytest.skip(f"Skipping due to 403 Forbidden (Anti-bot): {e}")
         else:
-            assert False, f"HTTP Error: {e}"
+            pytest.fail(f"HTTP Error: {e}")
     except Exception as e:
-        print(f"Failed to scrape: {e}")
-        assert False, f"Scrape failed: {e}"
+        pytest.fail(f"Scrape failed: {e}")
+
 
 if __name__ == "__main__":
     test_scrape()
+

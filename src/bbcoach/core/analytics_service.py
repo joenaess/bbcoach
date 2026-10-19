@@ -6,6 +6,7 @@ Business logic for statistical analysis and predictions.
 import logging
 from typing import Optional
 
+import numpy as np
 import pandas as pd
 
 from bbcoach.analysis import (
@@ -58,7 +59,6 @@ class AnalyticsService:
 
         top_players = filtered.sort_values(metric, ascending=False).head(limit)
 
-        import numpy as np
         # Convert NaN values to None directly so JSON encoders handle them gracefully
         top_players = top_players.replace({np.nan: None})
 
@@ -86,6 +86,30 @@ class AnalyticsService:
         except Exception as e:
             logger.error(f"Error getting team stats for {team_id}: {e}")
             return None
+
+    def get_team_schedule(
+        self, team_id: str, season: Optional[int] = None
+    ) -> list[dict]:
+        """
+        Get schedule games for a specific team.
+
+        Args:
+            team_id: Team identifier
+            season: Optional season filter
+
+        Returns:
+            List of schedule game dictionaries
+        """
+        schedule_df = self.data_service.load_schedule()
+        if schedule_df.empty or "team_id" not in schedule_df.columns:
+            return []
+
+        filtered = schedule_df[schedule_df["team_id"].astype(str) == str(team_id)]
+        if season is not None and "season" in filtered.columns:
+            filtered = filtered[filtered["season"] == season]
+
+        filtered = filtered.replace({np.nan: None})
+        return filtered.to_dict(orient="records")
 
     def predict_matchup(
         self, team_a_id: str, team_b_id: str, season: int
@@ -190,3 +214,4 @@ class AnalyticsService:
         ]
 
         return filtered.to_dict(orient="records")
+

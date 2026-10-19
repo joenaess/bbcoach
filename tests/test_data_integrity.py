@@ -1,7 +1,8 @@
-import sys
 import os
-import pytest
+import sys
+
 import pandas as pd
+import pytest
 
 # Add src to path
 sys.path.append(os.path.abspath("src"))

@@ -1,7 +1,8 @@
 import logging
 import uuid
-from bbcoach.scrapers.breakthrough_scraper import BreakthroughScraper
+
 from bbcoach.rag.vector_store import VectorStore
+from bbcoach.scrapers.breakthrough_scraper import BreakthroughScraper
 
 logger = logging.getLogger(__name__)
 

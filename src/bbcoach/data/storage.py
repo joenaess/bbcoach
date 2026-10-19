@@ -1,18 +1,29 @@
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
 
 DATA_DIR = Path("data_storage")
 
 
-def ensure_data_dir():
-    if not DATA_DIR.exists():
-        DATA_DIR.mkdir(parents=True)
+def _resolve_data_dir(data_dir: Path | str | None = None) -> Path:
+    return Path(data_dir) if data_dir is not None else DATA_DIR
 
 
-def save_teams(teams_data: list[dict], filename="teams.parquet"):
-    ensure_data_dir()
+def ensure_data_dir(data_dir: Path | str | None = None) -> Path:
+    target_dir = _resolve_data_dir(data_dir)
+    if not target_dir.exists():
+        target_dir.mkdir(parents=True)
+    return target_dir
+
+
+def save_teams(
+    teams_data: list[dict],
+    filename: str = "teams.parquet",
+    data_dir: Path | str | None = None,
+) -> None:
+    target_dir = ensure_data_dir(data_dir)
     df = pd.DataFrame(teams_data)
-    path = DATA_DIR / filename
+    path = target_dir / filename
     if path.exists():
         existing_df = pd.read_parquet(path)
         # simplistic merge: concat and drop duplicates
@@ -27,10 +38,14 @@ def save_teams(teams_data: list[dict], filename="teams.parquet"):
     print(f"Saved {len(df)} teams to {path}")
 
 
-def save_players(players_data: list[dict], filename="players.parquet"):
-    ensure_data_dir()
+def save_players(
+    players_data: list[dict],
+    filename: str = "players.parquet",
+    data_dir: Path | str | None = None,
+) -> None:
+    target_dir = ensure_data_dir(data_dir)
     df = pd.DataFrame(players_data)
-    path = DATA_DIR / filename
+    path = target_dir / filename
     if path.exists():
         existing_df = pd.read_parquet(path)
         # Include league in subset if available
@@ -44,8 +59,8 @@ def save_players(players_data: list[dict], filename="players.parquet"):
     print(f"Saved {len(df)} players to {path}")
 
 
-def load_teams() -> pd.DataFrame:
-    path = DATA_DIR / "teams.parquet"
+def load_teams(data_dir: Path | str | None = None) -> pd.DataFrame:
+    path = _resolve_data_dir(data_dir) / "teams.parquet"
     if path.exists():
         df = pd.read_parquet(path)
         if "league" not in df.columns:
@@ -54,8 +69,8 @@ def load_teams() -> pd.DataFrame:
     return pd.DataFrame()
 
 
-def load_players() -> pd.DataFrame:
-    path = DATA_DIR / "players.parquet"
+def load_players(data_dir: Path | str | None = None) -> pd.DataFrame:
+    path = _resolve_data_dir(data_dir) / "players.parquet"
     if path.exists():
         df = pd.read_parquet(path)
 
@@ -240,13 +255,17 @@ def load_players() -> pd.DataFrame:
 
     return pd.DataFrame()
 
-def save_schedule(schedule_data: list[dict], filename="schedule.parquet"):
-    ensure_data_dir()
+def save_schedule(
+    schedule_data: list[dict],
+    filename: str = "schedule.parquet",
+    data_dir: Path | str | None = None,
+) -> None:
+    target_dir = ensure_data_dir(data_dir)
     if not schedule_data:
         return
 
     df = pd.DataFrame(schedule_data)
-    path = DATA_DIR / filename
+    path = target_dir / filename
 
     if path.exists():
         existing_df = pd.read_parquet(path)
@@ -260,8 +279,8 @@ def save_schedule(schedule_data: list[dict], filename="schedule.parquet"):
     print(f"Saved {len(df)} schedule items to {path}")
 
 
-def load_schedule() -> pd.DataFrame:
-    path = DATA_DIR / "schedule.parquet"
+def load_schedule(data_dir: Path | str | None = None) -> pd.DataFrame:
+    path = _resolve_data_dir(data_dir) / "schedule.parquet"
     if path.exists():
         return pd.read_parquet(path)
     return pd.DataFrame()
