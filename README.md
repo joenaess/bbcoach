@@ -9,18 +9,19 @@
 
 ## 🌟 Features
 
-### 🧠 AI Coach
-- **Multiple AI Providers**: Gemini 2.0 Flash, OpenAI GPT-4o, Anthropic Claude, or local Qwen 2.5-1.5B
-- **Interactive Chat**: Ask tactical questions, get play suggestions, scouting reports
-- **Knowledge Base**: Integration with basketball drills and plays library
-- **Export Conversations**: Save coaching sessions to Markdown
+### 🧠 AI Coach & Högsbo Focus Club Architecture
+- **Högsbo Primary Focus Club**: Anchored by default on **Högsbo** (`Högsbo Lions` / `Högsbo Basket`), automatically resolving Genius Sports' competition-specific team IDs across seasons (`2024–2026`) and leagues (`SBL Herr` Men & `SBL Dam` Women)
+- **Schedule-Grounded AI Coach**: Automatically injects Högsbo's upcoming 4-game `Timestral-209M` schedule forecast (`win_probability`, `expected_score`, `coaching_note`) into AI coaching queries and practice planning
+- **Multiple AI Providers**: Gemini 2.0 Flash, OpenAI GPT-4o, Anthropic Claude, or local Qwen 2.5-1.5B fallback
+- **Knowledge Base**: RAG integration with basketball drills and plays library
+- **Export Conversations**: Save coaching sessions and tactical game plans to Markdown
 
-### 📊 Advanced Analytics
-- **Game Predictor**: AI-powered matchup analysis with projected lineups
-- **Multi-Season Trends**: Analyze historical data from 2021-2025
-- **Player Comparison**: Side-by-side statistical comparison with visual charts
-- **League Statistics**: Top players by any metric (PPG, RPG, APG, 3P%, etc.)
-- **Team Statistics**: Aggregated team stats and roster analysis
+### 📊 Advanced Analytics & `Timestral-209M` Time-Series Forecasting
+- **Timestral-209M Probabilistic Forecaster**: Zero-shot 21-quantile score, spread, win probability, and trajectory fan-chart forecasting powered by [`mistralai/Timestral-209M`](https://huggingface.co/mistralai/Timestral-209M) conditioned on known future covariates (home/away, opponent offensive/defensive ratings, and categorical opponent target-encoding) with automatic CUDA-to-CPU fallback
+- **Coach's Tactical Brief & "What-If" Simulator**: Translates 21-quantile score distributions into game dynamics (`Shootout Alert`, `Grind-It-Out`, `High Variance`), blow-out/clutch probabilities, and interactive tactical sliders (Pace Control, Offensive Execution `+3% 3P%`, Defensive Scheme `-2 TOV`)
+- **2026–2027 SBL Season Support**: Full rosters, team statistics, and 2026–2027 schedules for both `SBL Herr` (Men, ID `48974`) and `SBL Dam` (Women, ID `49288`), alongside historical 2024–2025 data
+- **Historical Backtest Evaluation**: Built-in evaluation comparing `Timestral-209M` against Rolling-5 and Season Average baselines (**70.0% win accuracy** on SBL Herr and **70.4% win accuracy** on SBL Dam)
+- **Player Comparison & League Statistics**: Side-by-side statistical comparison, top players by metric, and team roster rotation analytics
 
 ### 🎨 Modern Interface
 - **Responsive Design**: Works on desktop, tablet, and mobile
@@ -41,7 +42,7 @@
 │  └─────────────┘  └─────────────┘  └─────────────┘              │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
 │  │  Predictor  │  │  AI Coach    │  │  Comparison │              │
-│  │             │  │  Chat        │  │             │              │
+│  │ (Timestral) │  │  (Högsbo)   │  │             │              │
 │  └─────────────┘  └─────────────┘  └─────────────┘              │
 │                                                                  │
 └─────────────────────────────────────────────────────────────────┘
@@ -52,11 +53,11 @@
 │                    BACKEND (FastAPI + Python)                    │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
 │  │  API Layer  │  │   Services  │  │    Data     │              │
-│  │  (15 REST)  │  │   (Business) │  │  (Parquet)  │              │
+│  │  (19 REST)  │  │   (Business) │  │  (Parquet)  │              │
 │  └─────────────┘  └─────────────┘  └─────────────┘              │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │   Config    │  │  AI Coach   │  │  Scrapers   │              │
-│  │   Layer     │  │  (Multiple) │  │  (Genius)   │              │
+│  │   Config    │  │  AI / TS    │  │  Scrapers   │              │
+│  │   Layer     │  │ (Timestral) │  │  (Genius)   │              │
 │  └─────────────┘  └─────────────┘  └─────────────┘              │
 │                                                                  │
 │  ┌────────────────────────────────────────────────────────────┐   │
@@ -184,20 +185,16 @@ You need two terminal windows:
 - Player leaderboards with GP and MIN
 
 ### 4. Game Predictor (`/predictor`)
-- Select any two teams
-- Single season matchup analysis
-- Multi-season historical trends
-- Tabbed interface
-- Formatted AI analysis display
+- **Högsbo-Anchored Workflow**: Defaults to **Högsbo** (`Högsbo Lions` / `Högsbo Basket`) as the Primary Focus Team and auto-selects Högsbo's next scheduled 2026–2027 opponent on load
+- **Next 2026–2027 Game Spotlight & Opponent Quick-Select**: 1-click chips for upcoming scheduled opponents with live `Timestral-209M` win probabilities
+- **Timestral-209M Probabilistic Forecast**: 21-quantile score distributions (`P10`–`P90`), win probability gauge, and trajectory fan charts (`Recharts`)
+- **Coach's Tactical Brief & "What-If" Simulator**: Interactive sliders for Pace, Offensive Boost (`+3% 3P%`), and Defensive Scheme (`-2 TOV`), plus 1-click AI Coach Game Plan generation
+- **Multi-Season & Historical Backtest Tabs**: Cross-season trend comparison (`2024–2026`) and live `Timestral-209M` historical evaluation vs baselines
 
 ### 5. AI Coach (`/coach`)
-- Interactive chat interface
-- Ask tactical questions
-- Get play suggestions
-- Generate scouting reports
-- Context sidebar with team info
-- Export conversation to Markdown
-- Message history
+- **Högsbo Primary Focus Team**: Automatically resolves Högsbo across `SBL Herr` and `SBL Dam` and injects the upcoming 4-game `Timestral-209M` schedule forecast into every coaching query
+- **Interactive Chat & Quick Actions**: Generate opponent scouting reports, offensive/defensive strategies, and practice plans grounded in real stats
+- **Export Conversation**: Save sessions to Markdown
 
 ### 6. Player Comparison (`/comparison`)
 - Select 2 players from roster
@@ -206,7 +203,7 @@ You need two terminal windows:
 - Additional stats summary
 
 ### 7. Schedule (`/schedule`)
-- Team selector
+- Auto-selects **Högsbo** on load across leagues and seasons
 - View team game schedule (opponent, home/away, date, result)
 - Fallback to team rotation & key player statistics when schedule data is pending
 
@@ -214,7 +211,7 @@ You need two terminal windows:
 
 ## 📡 API Documentation
 
-### Available Endpoints (16 REST Routes)
+### Available Endpoints (19 REST Routes)
 
 **Health & Data:**
 - `GET /health` - Health check
@@ -231,9 +228,12 @@ You need two terminal windows:
 - `GET /api/stats/schedule/{team_id}` - Get team game schedule
 - `POST /api/stats/compare-players` - Compare multiple players side-by-side
 
-**Analytics:**
+**Analytics & Timestral-209M Forecasting:**
 - `POST /api/analytics/predict-matchup` - Predict matchup (single season)
-- `POST /api/analytics/predict-matchup-multi-season` - Predict matchup (multi-season)
+- `POST /api/analytics/predict-matchup-multi-season` - Predict matchup (multi-season across canonical club IDs)
+- `GET /api/analytics/timestral/forecast/{team_id}` - Forecast upcoming 2026–2027 games with 21-quantile intervals via `Timestral-209M`
+- `POST /api/analytics/timestral/matchup` - Probabilistic head-to-head matchup forecast & Coach's Tactical Brief via `Timestral-209M` (supports What-If adjustments)
+- `GET /api/analytics/timestral/evaluate` - Evaluate `Timestral-209M` on held-out historical SBL games vs baselines
 
 **Coach (AI):**
 - `POST /api/coach/ask` - Ask the AI coach a question (with optional team/season context)
@@ -281,7 +281,7 @@ The app will use the configured provider in `Settings` (or per-request override)
 
 - **Data Directory**: `data_storage/` (Parquet files: `players.parquet`, `teams.parquet`, `schedule.parquet`, `metadata.json`)
 - **Vector DB**: `.vectordb/` (ChromaDB)
-- **Competitions**: Configured in `src/bbcoach/config/settings.py` and `src/bbcoach/data/scrapers.py`
+- **Competitions**: Configured in `src/bbcoach/config/settings.py` and `src/bbcoach/data/scrapers.py` (includes 2024–2025, 2025–2026, and 2026–2027 `SBL Herr` and `SBL Dam`)
 
 ---
 
@@ -292,7 +292,7 @@ The app will use the configured provider in `Settings` (or per-request override)
 Tests are configured in `pyproject.toml` and isolated from `data_storage/` using temporary directories and mocks.
 
 ```bash
-# Run all unit and API tests (33 tests; excludes live external network tests by default)
+# Run all unit and API tests (35 tests; excludes live external network tests by default)
 uv run pytest
 
 # Run with verbose output
@@ -307,7 +307,7 @@ uv run pytest tests/test_services_and_analysis.py
 uv run pytest tests/test_storage.py::test_save_and_load_teams
 
 # Run tests matching pattern
-uv run pytest tests/ -k "matchup"
+uv run pytest tests/ -k "timestral"
 ```
 
 ### Linting
@@ -358,7 +358,7 @@ npm run lint
 ```
 bbcoach/
 ├── api/                        # FastAPI backend
-│   ├── main.py                # API application with 15 endpoints
+│   ├── main.py                # API application with 19 endpoints
 │   └── README.md              # API documentation
 │
 ├── src/bbcoach/               # Python modules
@@ -366,15 +366,16 @@ bbcoach/
 │   │   └── settings.py        # Pydantic settings
 │   ├── core/                  # Business logic layer
 │   │   ├── coach_service.py   # AI coach operations
-│   │   ├── analytics_service.py # Statistics & predictions
+│   │   ├── analytics_service.py # Statistics, predictions & Timestral integration
 │   │   └── data_service.py    # Data management
-│   ├── ai/                    # AI coach implementation
-│   │   └── coach.py          # Multi-provider AI coach
+│   ├── ai/                    # AI & Time-Series models
+│   │   ├── coach.py           # Multi-provider AI coach
+│   │   └── timestral_predictor.py # Timestral-209M probabilistic forecaster
 │   ├── data/                  # Data operations
 │   │   ├── storage.py         # Parquet data storage
 │   │   ├── scrapers.py        # Main scraper orchestrator
-│   │   ├── genius_scraper.py  # Genius Sports scraper
-│   │   └── analytics.py      # Statistical analysis
+│   │   ├── genius_scraper.py  # Genius Sports scraper (stats + schedules)
+│   │   └── analytics.py       # Statistical analysis
 │   └── rag/                   # RAG pipeline
 │       ├── pipeline.py        # RAG orchestration
 │       └── vector_store.py    # ChromaDB integration
@@ -386,8 +387,8 @@ bbcoach/
 │   │   ├── globals.css        # Global styles
 │   │   ├── dashboard/         # Dashboard page
 │   │   ├── stats/             # Stats page
-│   │   ├── predictor/         # Game predictor
-│   │   ├── coach/             # AI coach chat
+│   │   ├── predictor/         # Game predictor & Timestral-209M Coach Simulator
+│   │   ├── coach/             # AI coach chat (Högsbo focus)
 │   │   ├── comparison/        # Player comparison
 │   │   ├── schedule/          # Schedule page
 │   │   ├── not-found.tsx      # 404 page
@@ -395,7 +396,7 @@ bbcoach/
 │   ├── components/ui/         # UI components
 │   ├── hooks/                # React hooks
 │   │   ├── use-api.ts         # SWR data hooks
-│   │   └── use-app-store.ts   # Zustand global state
+│   │   └── use-app-store.ts   # Zustand global state & Högsbo focus resolver
 │   ├── lib/                  # Utilities
 │   │   ├── api-client.ts      # Axios API client
 │   │   └── utils.ts           # Helper functions
@@ -406,9 +407,9 @@ bbcoach/
 │   ├── tailwind.config.js
 │   └── README.md
 │
-├── data_storage/              # Parquet data files
+├── data_storage/              # Parquet data files (players, teams, schedule)
 ├── .vectordb/                 # ChromaDB vector store
-├── tests/                     # Test files test_*.py
+├── tests/                     # Test files test_*.py (35 unit/API + 1 integration)
 ├── app.py                     # Legacy Streamlit (deprecated)
 ├── start-api.sh              # Start backend script
 ├── setup.sh                  # Complete setup script
@@ -481,10 +482,10 @@ CMD ["npm", "start"]
 
 ## 📊 Current Data Status
 
-- **Players**: 342+ (Men's and Women's leagues)
-- **Teams**: 24+ across multiple seasons
-- **Games**: 642+ in schedule
-- **Seasons**: 2021-2025
+- **Players**: 904 player-season records (`SBL Herr` Men's and `SBL Dam` Women's leagues)
+- **Teams**: 68 team entries across seasons (with canonical cross-season club resolution)
+- **Games**: 2,760 scheduled and completed games (including 638 fixtures for `2026–2027`)
+- **Seasons**: `2024–2025`, `2025–2026`, and `2026–2027`
 
 ---
 
@@ -510,9 +511,15 @@ We welcome contributions! Please:
 
 ## 📜 Changelog
 
-### v2.0.0 (Current) - Architecture Migration
+### v2.1.0 (Current) - Timestral-209M Forecasting, 2026–2027 Season & Högsbo Focus
+- ✅ Integrated [`mistralai/Timestral-209M`](https://huggingface.co/mistralai/Timestral-209M) zero-shot probabilistic time-series forecasting (`70.0%` SBL Herr & `70.4%` SBL Dam backtest win accuracy)
+- ✅ Scraped full `2026–2027` SBL Herr (`48974`) and SBL Dam (`49288`) rosters, team stats, and schedules (`2,760` total games)
+- ✅ Added Coach's Tactical Brief, Interactive "What-If" Coaching Simulator, and 1-click AI Coach Game Plan generator in `/predictor`
+- ✅ Anchored UX and cross-season analytics around **Högsbo** (`Högsbo Lions` / `Högsbo Basket`) across Men's and Women's leagues
+
+### v2.0.0 - Architecture Migration
 - ✅ Migrated from Streamlit monolith to Next.js + FastAPI
-- ✅ Added RESTful API with 15 endpoints
+- ✅ Added RESTful API with 16 endpoints
 - ✅ Implemented modern frontend with 6 functional pages
 - ✅ Added TypeScript for type safety
 - ✅ Integrated SWR for data caching

@@ -244,31 +244,51 @@ def predict_matchup(players_df, team_a_id, team_b_id, season):
     return analysis
 
 
-def get_multi_season_aggregates(players_df, team_id, seasons=None):
+def get_multi_season_aggregates(players_df, team_id, seasons=None, teams_df=None):
     """
-    Aggregates stats for a team across specified seasons.
+    Aggregates stats for a team across specified seasons, resolving season-specific
+    team IDs via canonical club name when teams_df is provided.
     """
     if seasons is None:
         seasons = sorted(players_df["season"].unique().tolist(), reverse=True)
 
+    # Resolve all historical team_ids belonging to the same club across seasons
+    matching_ids = {str(team_id)}
+    if teams_df is not None and not teams_df.empty and "id" in teams_df.columns:
+        from bbcoach.ai.timestral_predictor import canonical_team_name
+
+        target_rows = teams_df[teams_df["id"].astype(str) == str(team_id)]
+        if not target_rows.empty:
+            target_canon = canonical_team_name(str(target_rows.iloc[0]["name"]))
+            target_league = str(target_rows.iloc[0].get("league", "Men"))
+            same_club = teams_df[
+                (teams_df["name"].apply(canonical_team_name) == target_canon)
+                & (teams_df["league"] == target_league)
+            ]
+            matching_ids.update(same_club["id"].astype(str).tolist())
+
     aggregated_stats = {
-        "total_ppg": 0,
-        "total_rpg": 0,
-        "total_apg": 0,
-        "avg_3p_pct": 0,
-        "total_to": 0,
+        "total_ppg": 0.0,
+        "total_rpg": 0.0,
+        "total_apg": 0.0,
+        "avg_3p_pct": 0.0,
+        "total_to": 0.0,
         "count": 0,
     }
 
     valid_seasons = 0
     for season in seasons:
-        stats = get_team_aggregates(players_df, team_id, season)
-        if stats:
-            aggregated_stats["total_ppg"] += stats["total_ppg"]
-            aggregated_stats["total_rpg"] += stats["total_rpg"]
-            aggregated_stats["total_apg"] += stats["total_apg"]
-            aggregated_stats["avg_3p_pct"] += stats["avg_3p_pct"]
-            aggregated_stats["total_to"] += stats["total_to"]
+        season_stats = None
+        for cand_id in matching_ids:
+            season_stats = get_team_aggregates(players_df, cand_id, season)
+            if season_stats:
+                break
+        if season_stats:
+            aggregated_stats["total_ppg"] += season_stats["total_ppg"]
+            aggregated_stats["total_rpg"] += season_stats["total_rpg"]
+            aggregated_stats["total_apg"] += season_stats["total_apg"]
+            aggregated_stats["avg_3p_pct"] += season_stats["avg_3p_pct"]
+            aggregated_stats["total_to"] += season_stats["total_to"]
             valid_seasons += 1
 
     if valid_seasons > 0:
@@ -278,12 +298,12 @@ def get_multi_season_aggregates(players_df, team_id, seasons=None):
     return None
 
 
-def predict_matchup_multi_season(players_df, team_a_id, team_b_id):
+def predict_matchup_multi_season(players_df, team_a_id, team_b_id, teams_df=None):
     """
     Compares two teams based on multi-season performance.
     """
-    stats_a = get_multi_season_aggregates(players_df, team_a_id)
-    stats_b = get_multi_season_aggregates(players_df, team_b_id)
+    stats_a = get_multi_season_aggregates(players_df, team_a_id, teams_df=teams_df)
+    stats_b = get_multi_season_aggregates(players_df, team_b_id, teams_df=teams_df)
 
     if not stats_a or not stats_b:
         return "Insufficient historical data for multi-season prediction."
@@ -292,7 +312,7 @@ def predict_matchup_multi_season(players_df, team_a_id, team_b_id):
     favored = "Your Team" if diff_ppg > 0 else "Opponent"
 
     analysis = (
-        f"MULTI-SEASON TREND ANALYSIS (2021-2025)\n"
+        f"MULTI-SEASON TREND ANALYSIS (2021-2027)\n"
         f"=======================================\n"
         f"Historical Team Potentials (Avg per Season):\n"
         f"Your Team: {stats_a['total_ppg']:.1f} PPG | {stats_a['total_rpg']:.1f} RPG | "
@@ -305,3 +325,4 @@ def predict_matchup_multi_season(players_df, team_a_id, team_b_id):
         f"Modeling suggests consistent performance trends favor {favored}.\n"
     )
     return analysis
+

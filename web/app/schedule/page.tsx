@@ -5,24 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTeams, useSeasons } from "@/hooks/use-api";
-import { useAppStore } from "@/hooks/use-app-store";
+import { useAppStore, resolveFocusTeam } from "@/hooks/use-app-store";
 import api from "@/lib/api-client";
 import { Calendar, Trophy, Home, Plane, FileText } from "lucide-react";
 
 export default function SchedulePage() {
-  const { currentSeason, currentLeague, myTeamId } = useAppStore();
+  const { currentSeason, currentLeague, myTeamId, focusClub } = useAppStore();
   const [schedule, setSchedule] = useState<any>([]);
   const [selectedTeamId, setSelectedTeamId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const { data: teamsData } = useTeams(currentSeason, currentLeague);
   const teams = teamsData?.teams || [];
+  const focusTeam = resolveFocusTeam(teams, focusClub, myTeamId);
 
   useEffect(() => {
-    if (myTeamId && !selectedTeamId) {
-      setSelectedTeamId(myTeamId);
+    if (focusTeam && (!selectedTeamId || !teams.some((t) => t.id === selectedTeamId))) {
+      setSelectedTeamId(focusTeam.id);
     }
-  }, [myTeamId]);
+  }, [focusTeam?.id, teams.length]);
 
   useEffect(() => {
     if (selectedTeamId && currentSeason) {

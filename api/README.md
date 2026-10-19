@@ -8,7 +8,7 @@ The API is built with:
 - **FastAPI 0.135** - Modern, fast Python web framework
 - **Pydantic** - Data validation using Python type annotations
 - **Uvicorn** - ASGI server for production deployment
-- **15 RESTful endpoints** - Complete API coverage
+- **19 RESTful endpoints** - Complete API coverage including `Timestral-209M` probabilistic forecasting
 
 ## Quick Start
 
@@ -93,21 +93,36 @@ Once the server is running:
 - Purpose: Team game schedule view
 
 **POST** `/api/stats/compare-players`
-- Body: `{ "player_names": [...], "season": 2025, "league": "Men" }`
+- Body: `{ "player_names": [...], "season": 2026, "league": "Men" }`
 - Returns: Comparison data for selected players
 - Purpose: Player comparison tool
 
-### Analytics
+### Analytics & Timestral-209M Forecasting
 
 **POST** `/api/analytics/predict-matchup`
-- Body: `{ "team_a_id": "...", "team_b_id": "...", "season": 2025 }`
-- Returns: AI-powered matchup analysis
+- Body: `{ "team_a_id": "...", "team_b_id": "...", "season": 2026 }`
+- Returns: Statistical & AI-powered matchup analysis
 - Purpose: Game prediction with lineups and stats
 
 **POST** `/api/analytics/predict-matchup-multi-season`
 - Body: `{ "team_a_id": "...", "team_b_id": "..." }`
-- Returns: Multi-season historical trend analysis
+- Returns: Multi-season historical trend analysis across canonical club IDs (`2024–2026`)
 - Purpose: Long-term team comparison
+
+**GET** `/api/analytics/timestral/forecast/{team_id}`
+- Query params: `season` (default `2026`), `horizon` (default `8`)
+- Returns: `Timestral-209M` 21-quantile score forecasts, win probabilities, and coaching notes for upcoming scheduled games
+- Purpose: Schedule trajectory fan chart and opponent preparation
+
+**POST** `/api/analytics/timestral/matchup`
+- Body: `{ "team_a_id": "...", "team_b_id": "...", "season": 2026, "team_a_home": true, "pace_adjustment": 0, "team_a_off_boost": 0, "team_a_def_boost": 0 }`
+- Returns: Head-to-head `Timestral-209M` quantile forecast, win probability, Coach's Tactical Brief (`coach_brief`), and What-If scenario simulation
+- Purpose: Interactive tactical game preparation
+
+**GET** `/api/analytics/timestral/evaluate`
+- Query params: `league` (`Men` or `Women`), `max_eval_games` (default `60`)
+- Returns: Historical backtest metrics (Win Accuracy, MAE, RMSE, P10–P90 Calibration Coverage) vs Rolling-5 and Season-Average baselines
+- Purpose: Model validation and benchmark transparency
 
 ### Coach (AI)
 

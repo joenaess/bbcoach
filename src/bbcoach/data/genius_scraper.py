@@ -250,7 +250,7 @@ class GeniusScraper:
                     # Player in roster but no stats? (Maybe 0 games?)
                     pass
 
-            time.sleep(1)  # Politeness
+            time.sleep(0.1)  # Politeness
 
         return final_players, teams
 
@@ -326,13 +326,17 @@ class GeniusScraper:
             home_score = get_score(home_div)
             away_score = get_score(away_div)
 
-            result_str = "Scheduled"
-            # If scores are numeric, create result string
+            home_result = "Scheduled"
+            away_result = "Scheduled"
+            h_pts = None
+            a_pts = None
+
             if home_score.isdigit() and away_score.isdigit():
-                # Logic: if date is in past (heuristic) or status is complete?
-                # The match div has class STATUS_COMPLETE
                 if "STATUS_COMPLETE" in match.get("class", []):
-                    result_str = f"{home_score}-{away_score}"
+                    h_pts = int(home_score)
+                    a_pts = int(away_score)
+                    home_result = f"{h_pts}-{a_pts}"
+                    away_result = f"{a_pts}-{h_pts}"
 
             # Add records
             schedule_data.append(
@@ -342,8 +346,11 @@ class GeniusScraper:
                     "team_name": home_name,
                     "opponent": away_name,
                     "opponent_id": away_id,
-                    "result": result_str,
+                    "result": home_result,
                     "home_away": "Home",
+                    "team_score": h_pts,
+                    "opponent_score": a_pts,
+                    "point_diff": (h_pts - a_pts) if h_pts is not None and a_pts is not None else None,
                 }
             )
 
@@ -354,8 +361,11 @@ class GeniusScraper:
                     "team_name": away_name,
                     "opponent": home_name,
                     "opponent_id": home_id,
-                    "result": result_str,
+                    "result": away_result,
                     "home_away": "Away",
+                    "team_score": a_pts,
+                    "opponent_score": h_pts,
+                    "point_diff": (a_pts - h_pts) if h_pts is not None and a_pts is not None else None,
                 }
             )
 

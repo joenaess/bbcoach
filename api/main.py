@@ -51,6 +51,16 @@ class MatchupRequest(BaseModel):
     season: int
 
 
+class TimestralMatchupRequest(BaseModel):
+    team_a_id: str
+    team_b_id: str
+    league: str = "Men"
+    team_a_home: bool = True
+    pace_adjustment: float = 0.0
+    team_a_off_boost: float = 0.0
+    team_a_def_boost: float = 0.0
+
+
 class PlayerRequest(BaseModel):
     player_names: list[str]
     season: int
@@ -268,6 +278,62 @@ async def predict_multi_season_matchup(request: MultiMatchupRequest):
         "team_b_id": request.team_b_id,
         "analysis": analysis,
     }
+
+
+@app.get("/api/analytics/timestral/forecast/{team_id}")
+async def timestral_team_forecast(
+    team_id: str,
+    league: str = Query("Men", description="League filter (Men or Women)"),
+    horizon: int = Query(6, ge=1, le=15, description="Forecast horizon in games"),
+):
+    """Forecast upcoming team games with 21-quantile distributions via Timestral-209M."""
+    forecast = analytics_service.forecast_team_trajectory(
+        team_id=team_id, league=league, horizon=horizon
+    )
+    if forecast is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Insufficient historical schedule data for Timestral forecast",
+        )
+    return forecast
+
+
+@app.post("/api/analytics/timestral/matchup")
+async def timestral_matchup_prediction(request: TimestralMatchupRequest):
+    """Predict head-to-head matchup probabilities and score quantiles via Timestral-209M."""
+    prediction = analytics_service.predict_timestral_matchup(
+        team_a_id=request.team_a_id,
+        team_b_id=request.team_b_id,
+        league=request.league,
+        team_a_home=request.team_a_home,
+        pace_adjustment=request.pace_adjustment,
+        team_a_off_boost=request.team_a_off_boost,
+        team_a_def_boost=request.team_a_def_boost,
+    )
+    if prediction is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Insufficient historical schedule data for Timestral matchup prediction",
+        )
+    return prediction
+
+
+@app.get("/api/analytics/timestral/evaluate")
+async def timestral_evaluate_backtest(
+    league: str = Query("Men", description="League filter (Men or Women)"),
+    eval_games_per_team: int = Query(6, ge=1, le=15, description="Held-out games per team"),
+):
+    """Evaluate Timestral-209M on held-out historical SBL games vs baselines."""
+    evaluation = analytics_service.evaluate_timestral_backtest(
+        league=league, eval_games_per_team=eval_games_per_team
+    )
+    if evaluation is None or "error" in evaluation:
+        raise HTTPException(
+            status_code=404,
+            detail=(evaluation or {}).get("error", "Timestral evaluation failed"),
+        )
+    return evaluation
+
 
 
 # Coach/AI endpoints

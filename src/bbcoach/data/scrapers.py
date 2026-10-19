@@ -71,29 +71,31 @@ def scrape_competitions(competitions: list[dict], progress_callback=None) -> tup
 
 
 def run_current_season(progress_callback=None) -> tuple[int, int]:
-    """Scrape only the current active season (2025)."""
+    """Scrape only the current active season (2026-2027)."""
     competitions = [
-        {"id": 41539, "name": "SBL Herr", "year": 2025, "league": "Men"},
-        {"id": 42013, "name": "SBL Dam", "year": 2025, "league": "Women"},
+        {"id": 48974, "name": "SBL Herr", "year": 2026, "league": "Men"},
+        {"id": 49288, "name": "SBL Dam", "year": 2026, "league": "Women"},
     ]
     return scrape_competitions(competitions, progress_callback=progress_callback)
 
 
 def main(progress_callback=None):
-    """Scrape all historical seasons (Initial Setup)."""
+    """Scrape all seasons including 2026-2027 and historical 2021-2025."""
     competitions = [
         # --- MEN (SBL Herr) ---
+        {"id": 48974, "name": "SBL Herr", "year": 2026, "league": "Men"},
         {"id": 41539, "name": "SBL Herr", "year": 2025, "league": "Men"},
-        {"id": 36998, "name": "SBL Herr", "year": 2024, "league": "Men"},
-        {"id": 32115, "name": "SBL Herr", "year": 2023, "league": "Men"},
-        {"id": None, "name": "SBL Herr", "year": 2022, "league": "Men"},
-        {"id": None, "name": "SBL Herr", "year": 2021, "league": "Men"},
+        {"id": 38899, "name": "SBL Herr", "year": 2024, "league": "Men"},
+        {"id": 36398, "name": "SBL Herr", "year": 2023, "league": "Men"},
+        {"id": 34040, "name": "SBL Herr", "year": 2022, "league": "Men"},
+        {"id": 30968, "name": "SBL Herr", "year": 2021, "league": "Men"},
         # --- WOMEN (SBL Dam) ---
+        {"id": 49288, "name": "SBL Dam", "year": 2026, "league": "Women"},
         {"id": 42013, "name": "SBL Dam", "year": 2025, "league": "Women"},
-        {"id": 37248, "name": "SBL Dam", "year": 2024, "league": "Women"},
-        {"id": 31766, "name": "SBL Dam", "year": 2023, "league": "Women"},
-        {"id": None, "name": "SBL Dam", "year": 2022, "league": "Women"},
-        {"id": None, "name": "SBL Dam", "year": 2021, "league": "Women"},
+        {"id": 39557, "name": "SBL Dam", "year": 2024, "league": "Women"},
+        {"id": 36406, "name": "SBL Dam", "year": 2023, "league": "Women"},
+        {"id": 34105, "name": "SBL Dam", "year": 2022, "league": "Women"},
+        {"id": 30967, "name": "SBL Dam", "year": 2021, "league": "Women"},
     ]
     return scrape_competitions(competitions, progress_callback=progress_callback)
 

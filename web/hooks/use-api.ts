@@ -36,3 +36,25 @@ export function useModelInfo() {
     refreshInterval: 300000, // Refresh every 5 minutes
   });
 }
+
+export function useTimestralForecast(
+  teamId: string | undefined,
+  league: string = "Men",
+  horizon: number = 6
+) {
+  return useSWR(
+    teamId ? `/timestral/forecast/${teamId}/${league}/${horizon}` : null,
+    () => (teamId ? api.getTimestralForecast(teamId, league, horizon) : null)
+  );
+}
+
+export function useTimestralEvaluation(
+  league: string = "Men",
+  evalGamesPerTeam: number = 6
+) {
+  return useSWR(
+    `/timestral/evaluate/${league}/${evalGamesPerTeam}`,
+    () => api.getTimestralEvaluation(league, evalGamesPerTeam)
+  );
+}
+

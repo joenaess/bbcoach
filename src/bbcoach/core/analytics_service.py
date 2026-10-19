@@ -21,14 +21,25 @@ logger = logging.getLogger(__name__)
 class AnalyticsService:
     """Service for analytics operations."""
 
-    def __init__(self, data_service):
+    def __init__(self, data_service, timestral_predictor=None):
         """
         Initialize the analytics service.
 
         Args:
             data_service: DataService instance for loading data
+            timestral_predictor: Optional TimestralPredictor instance (lazy-loaded by default)
         """
         self.data_service = data_service
+        self._timestral_predictor = timestral_predictor
+
+    @property
+    def timestral_predictor(self):
+        """Lazy-load TimestralPredictor on first request."""
+        if self._timestral_predictor is None:
+            from bbcoach.ai.timestral_predictor import TimestralPredictor
+
+            self._timestral_predictor = TimestralPredictor()
+        return self._timestral_predictor
 
     def get_top_players(
         self, season: int, league: str = "Men", metric: str = "PPG", limit: int = 10
@@ -151,12 +162,15 @@ class AnalyticsService:
             Multi-season analysis or None
         """
         players_df = self.data_service.load_players()
+        teams_df = self.data_service.load_teams()
 
         if players_df.empty:
             return None
 
         try:
-            analysis = predict_matchup_multi_season(players_df, team_a_id, team_b_id)
+            analysis = predict_matchup_multi_season(
+                players_df, team_a_id, team_b_id, teams_df=teams_df
+            )
             return analysis
         except Exception as e:
             logger.error(f"Error in multi-season prediction: {e}")
@@ -214,4 +228,76 @@ class AnalyticsService:
         ]
 
         return filtered.to_dict(orient="records")
+
+    def forecast_team_trajectory(
+        self, team_id: str, league: str = "Men", horizon: int = 6
+    ) -> Optional[dict]:
+        """
+        Forecast upcoming team game trajectory using mistralai/Timestral-209M.
+        """
+        schedule_df = self.data_service.load_schedule()
+        if schedule_df.empty:
+            return None
+
+        try:
+            return self.timestral_predictor.forecast_team_trajectory(
+                schedule_df, team_identifier=team_id, league=league, horizon=horizon
+            )
+        except Exception as e:
+            logger.error(f"Error in Timestral trajectory forecast for {team_id}: {e}", exc_info=True)
+            return None
+
+    def predict_timestral_matchup(
+        self,
+        team_a_id: str,
+        team_b_id: str,
+        league: str = "Men",
+        team_a_home: bool = True,
+        pace_adjustment: float = 0.0,
+        team_a_off_boost: float = 0.0,
+        team_a_def_boost: float = 0.0,
+    ) -> Optional[dict]:
+        """
+        Predict head-to-head matchup probabilities and score quantiles using Timestral-209M.
+        """
+        schedule_df = self.data_service.load_schedule()
+        if schedule_df.empty:
+            return None
+
+        try:
+            return self.timestral_predictor.predict_head_to_head(
+                schedule_df,
+                team_a_identifier=team_a_id,
+                team_b_identifier=team_b_id,
+                league=league,
+                team_a_home=team_a_home,
+                pace_adjustment=pace_adjustment,
+                team_a_off_boost=team_a_off_boost,
+                team_a_def_boost=team_a_def_boost,
+            )
+        except Exception as e:
+            logger.error(
+                f"Error in Timestral head-to-head prediction ({team_a_id} vs {team_b_id}): {e}",
+                exc_info=True,
+            )
+            return None
+
+    def evaluate_timestral_backtest(
+        self, league: str = "Men", eval_games_per_team: int = 6
+    ) -> Optional[dict]:
+        """
+        Evaluate Timestral-209M on historical SBL games vs Rolling-5 and Season Average baselines.
+        """
+        schedule_df = self.data_service.load_schedule()
+        if schedule_df.empty:
+            return None
+
+        try:
+            return self.timestral_predictor.evaluate_historical_backtest(
+                schedule_df, league=league, eval_games_per_team=eval_games_per_team
+            )
+        except Exception as e:
+            logger.error(f"Error in Timestral backtest evaluation: {e}", exc_info=True)
+            return None
+
 

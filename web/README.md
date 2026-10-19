@@ -4,12 +4,13 @@ Modern Next.js 14 frontend for the BBCoach basketball analytics platform.
 
 ## Features
 
-- 🏀 **Dashboard**: Real-time data overview and quick actions
+- 🦁 **Högsbo Primary Focus Club**: Automatically resolves **Högsbo** (`Högsbo Lions` / `Högsbo Basket`) across `SBL Herr` (Men), `SBL Dam` (Women), and seasons (`2024–2026`)
+- 🔮 **Timestral-209M Predictor & Coach Simulator**: Next-game spotlight, 21-quantile score distributions, trajectory fan charts, interactive What-If tactical sliders, and 1-click AI Coach game plans
+- 🏀 **Dashboard**: Real-time data overview and background Genius Sports scraper progress
 - 📊 **League Statistics**: Top players, leaderboards, team stats
-- 🔮 **Game Predictor**: AI-powered matchup analysis
-- 🤖 **AI Coach**: Interactive coaching chat assistant
+- 🤖 **AI Coach**: Interactive coaching chat grounded in Högsbo's roster and upcoming `Timestral-209M` schedule forecast
 - ⚖️ **Player Comparison**: Side-by-side statistical comparison
-- 📅 **Schedule**: Team schedules and roster view
+- 📅 **Schedule**: Team schedules and roster rotation view
 
 ## Tech Stack
 

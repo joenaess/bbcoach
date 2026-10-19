@@ -244,3 +244,105 @@ def test_get_model_info():
     assert response.status_code == 200
     assert "Qwen" in response.json()["model"]
 
+
+def test_timestral_endpoints(monkeypatch):
+    """Test Timestral trajectory forecast, head-to-head matchup, and evaluation endpoints."""
+    mock_forecast = {
+        "model": "mistralai/Timestral-209M",
+        "team_name": "Team Alpha",
+        "league": "Men",
+        "historical_games_used": 90,
+        "seasons_covered": [2024, 2025, 2026],
+        "recent_avg_ppg": 88.5,
+        "recent_avg_opp_ppg": 81.2,
+        "expected_wins_next_n": 4.2,
+        "horizon": 6,
+        "history": [],
+        "forecast": [
+            {
+                "step": 1,
+                "date": "Oct 23, 2026, 7:04 PM",
+                "season": 2026,
+                "opponent": "Team Beta",
+                "home_away": "Home",
+                "team_score": {"median": 89.0, "q10": 77.0, "q25": 83.0, "q75": 95.0, "q90": 101.0},
+                "opponent_score": {"median": 81.0, "q10": 70.0, "q25": 75.0, "q75": 87.0, "q90": 93.0},
+                "point_diff": {"median": 8.0, "q10": -6.0, "q25": 1.0, "q75": 15.0, "q90": 22.0},
+                "win_probability": 72.5,
+            }
+        ],
+    }
+    mock_matchup = {
+        "model": "mistralai/Timestral-209M",
+        "league": "Men",
+        "team_a": "Team Alpha",
+        "team_b": "Team Beta",
+        "venue": "Team Alpha Home",
+        "win_prob_a": 71.2,
+        "win_prob_b": 28.8,
+        "team_a_score": {"median": 89.5, "q10": 76.0, "q25": 82.5, "q75": 96.0, "q90": 103.0},
+        "team_b_score": {"median": 81.5, "q10": 70.0, "q25": 76.0, "q75": 87.0, "q90": 94.0},
+        "spread": {"median": 8.0, "q10": -7.5, "q25": 0.5, "q75": 15.5, "q90": 23.0},
+        "total_points": {"median": 171.0, "q10": 146.0, "q90": 197.0},
+        "head_to_head_history": [],
+    }
+    mock_eval = {
+        "model": "mistralai/Timestral-209M",
+        "league": "Men",
+        "teams_evaluated": 10,
+        "games_evaluated": 60,
+        "metrics": {
+            "timestral_209m": {
+                "win_accuracy_pct": 70.0,
+                "spread_mae": 11.01,
+                "score_mae": 8.06,
+                "brier_score": 0.1989,
+                "interval_80_coverage_pct": 91.7,
+            },
+            "rolling_5_baseline": {
+                "win_accuracy_pct": 65.0,
+                "spread_mae": 12.35,
+                "score_mae": 8.86,
+            },
+            "season_avg_baseline": {
+                "win_accuracy_pct": 61.7,
+                "spread_mae": 10.77,
+                "score_mae": 8.25,
+            },
+        },
+        "sample_predictions": [],
+    }
+
+    monkeypatch.setattr(
+        api.main.analytics_service,
+        "forecast_team_trajectory",
+        MagicMock(return_value=mock_forecast),
+    )
+    monkeypatch.setattr(
+        api.main.analytics_service,
+        "predict_timestral_matchup",
+        MagicMock(return_value=mock_matchup),
+    )
+    monkeypatch.setattr(
+        api.main.analytics_service,
+        "evaluate_timestral_backtest",
+        MagicMock(return_value=mock_eval),
+    )
+
+    fc_resp = client.get("/api/analytics/timestral/forecast/t1?league=Men&horizon=6")
+    assert fc_resp.status_code == 200
+    assert fc_resp.json()["team_name"] == "Team Alpha"
+    assert fc_resp.json()["expected_wins_next_n"] == 4.2
+
+    m_resp = client.post(
+        "/api/analytics/timestral/matchup",
+        json={"team_a_id": "t1", "team_b_id": "t2", "league": "Men", "team_a_home": True},
+    )
+    assert m_resp.status_code == 200
+    assert m_resp.json()["win_prob_a"] == 71.2
+
+    ev_resp = client.get("/api/analytics/timestral/evaluate?league=Men&eval_games_per_team=6")
+    assert ev_resp.status_code == 200
+    assert ev_resp.json()["metrics"]["timestral_209m"]["win_accuracy_pct"] == 70.0
+
+

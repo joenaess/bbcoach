@@ -39,7 +39,10 @@ class Settings(BaseSettings):
 
     # Competitions Configuration
     competitions: list[dict] = [
+        {"id": 48974, "name": "SBL Herr", "year": 2026, "league": "Men"},
+        {"id": 49288, "name": "SBL Dam", "year": 2026, "league": "Women"},
         {"id": 41539, "name": "SBL Herr", "year": 2025, "league": "Men"},
+        {"id": 42013, "name": "SBL Dam", "year": 2025, "league": "Women"},
     ]
 
     # API Configuration

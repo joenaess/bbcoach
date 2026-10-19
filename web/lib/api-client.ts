@@ -18,6 +18,10 @@ import type {
   ScoutResponse,
   ModelInfoResponse,
   ScrapingProgress,
+  TimestralTrajectoryResponse,
+  TimestralMatchupRequest,
+  TimestralMatchupResponse,
+  TimestralBacktestResponse,
 } from "@/types/api";
 
 class ApiClient {
@@ -165,6 +169,45 @@ class ApiClient {
     );
     return data.analysis;
   }
+
+  // Timestral-209M Time-Series Forecasting
+  async getTimestralForecast(
+    teamId: string,
+    league: string = "Men",
+    horizon: number = 6
+  ): Promise<TimestralTrajectoryResponse> {
+    const { data } = await this.client.get<TimestralTrajectoryResponse>(
+      `/api/analytics/timestral/forecast/${encodeURIComponent(teamId)}`,
+      {
+        params: { league, horizon },
+      }
+    );
+    return data;
+  }
+
+  async predictTimestralMatchup(
+    request: TimestralMatchupRequest
+  ): Promise<TimestralMatchupResponse> {
+    const { data } = await this.client.post<TimestralMatchupResponse>(
+      "/api/analytics/timestral/matchup",
+      request
+    );
+    return data;
+  }
+
+  async getTimestralEvaluation(
+    league: string = "Men",
+    evalGamesPerTeam: number = 6
+  ): Promise<TimestralBacktestResponse> {
+    const { data } = await this.client.get<TimestralBacktestResponse>(
+      "/api/analytics/timestral/evaluate",
+      {
+        params: { league, eval_games_per_team: evalGamesPerTeam },
+      }
+    );
+    return data;
+  }
+
 
   // Coach/AI
   async askCoach(request: CoachRequest): Promise<CoachResponse> {

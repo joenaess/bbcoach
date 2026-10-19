@@ -5,9 +5,10 @@
 Full-stack application: **Next.js 14.1 frontend** + **FastAPI backend** + **Python 3.13 services**
 
 - Frontend: `web/` (Next.js, TypeScript, Tailwind, SWR, Zustand)
-- Backend API: `api/main.py` (FastAPI with 16 REST endpoints)
+- Backend API: `api/main.py` (FastAPI with 19 REST endpoints)
 - Core Services: `src/bbcoach/core/` (CoachService, AnalyticsService, DataService)
-- Data/AI: `src/bbcoach/data/`, `src/bbcoach/ai/`, `src/bbcoach/rag/`
+- Data/AI: `src/bbcoach/data/`, `src/bbcoach/ai/` (`coach.py`, `timestral_predictor.py`), `src/bbcoach/rag/`
+- Focus Club Architecture: Anchored on **Högsbo** (`focusClub: "Högsbo"` via `resolveFocusTeam` in `web/hooks/use-app-store.ts` and canonical club matching in `src/bbcoach/analysis.py` and `src/bbcoach/ai/timestral_predictor.py`)
 
 ## Development Commands
 
@@ -32,7 +33,7 @@ cd web && npm run lint        # Frontend linting
 
 ### Testing
 ```bash
-uv run pytest                 # Run all unit & API tests (33 tests)
+uv run pytest                 # Run all unit & API tests (35 tests)
 uv run pytest -v              # Verbose output
 uv run pytest -m integration  # Run live external network integration tests
 uv run pytest tests/test_storage.py::test_save_and_load_teams  # Single test
@@ -100,7 +101,7 @@ uv run ruff check --fix       # Auto-fix issues
 ### File Organization
 - `src/bbcoach/` - Main source code
 - `src/bbcoach/data/` - Data scrapers, storage, analytics
-- `src/bbcoach/ai/` - AI/coach implementation
+- `src/bbcoach/ai/` - AI/coach implementation & `Timestral-209M` probabilistic forecaster
 - `src/bbcoach/rag/` - RAG pipeline, vector store
 - `tests/` - All test files
 - `data_storage/` - Parquet data files (automated)
@@ -118,12 +119,12 @@ uv run ruff check --fix       # Auto-fix issues
 - Playwright for web scraping
 - PyArrow/Parquet for data storage
 - ChromaDB for vector storage
-- Transformers/PyTorch for local AI models
+- Transformers/PyTorch & `timestral` (`mistralai/Timestral-209M`) for local AI & time-series forecasting
 - Multiple AI providers: Google Gemini, OpenAI, Anthropic, local Qwen
 
 ### Important Notes
 - Local AI model (Qwen 2.5-1.5B) used as fallback when no API key provided
-- Scrapers fetch basketball stats from Genius Sports
+- `Timestral-209M` (`src/bbcoach/ai/timestral_predictor.py`) provides 21-quantile score forecasts, win probabilities, and What-If tactical simulations with automatic CUDA-to-CPU fallback
+- Scrapers fetch basketball stats and schedules from Genius Sports across `2024–2026` (`SBL Herr` and `SBL Dam`)
 - RAG system scrapes BreakthroughBasketball.com for drills
-- Support both Men's and Women's leagues
-- Data includes players, teams, schedules across multiple seasons (2021-2025)
+- Support both Men's and Women's leagues with canonical cross-season club resolution (e.g., `Högsbo Basket` $\leftrightarrow$ `Högsbo Lions`)

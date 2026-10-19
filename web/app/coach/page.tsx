@@ -5,10 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useModelInfo, useTeams, useSeasons } from "@/hooks/use-api";
-import { useAppStore } from "@/hooks/use-app-store";
+import { useModelInfo, useTeams, useSeasons, useTimestralForecast } from "@/hooks/use-api";
+import { useAppStore, resolveFocusTeam } from "@/hooks/use-app-store";
 import api from "@/lib/api-client";
-import { Dribbble, Send, MessageSquare, User, Bot, Trash2, Download } from "lucide-react";
+import { Dribbble, Send, MessageSquare, User, Bot, Trash2, Download, Sparkles } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
@@ -16,7 +16,7 @@ interface Message {
 }
 
 export default function CoachPage() {
-  const { currentSeason, currentLeague, myTeamId } = useAppStore();
+  const { currentSeason, currentLeague, setCurrentLeague, focusClub, myTeamId } = useAppStore();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,7 +28,13 @@ export default function CoachPage() {
   const { data: teamsData } = useTeams(currentSeason, currentLeague);
 
   const teams = teamsData?.teams || [];
-  const myTeam = teams.find((t) => t.id === myTeamId);
+  const myTeam = resolveFocusTeam(teams, focusClub, myTeamId);
+
+  const { data: myTeamForecast } = useTimestralForecast(
+    myTeam?.id,
+    currentLeague,
+    4
+  );
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -42,8 +48,12 @@ export default function CoachPage() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const ctx = params.get("context");
+      const promptParam = params.get("prompt");
       if (ctx) {
         setContext(ctx);
+      }
+      if (promptParam) {
+        setInput(promptParam);
       }
     }
   }, []);
@@ -56,11 +66,23 @@ export default function CoachPage() {
     setMessages((prev) => [...prev, { role: "user", content: userMessage }]);
     setIsLoading(true);
 
+    const timestralSummary = myTeamForecast
+      ? `Primary Focus Team: ${myTeamForecast.team_name} (${currentLeague})\nUpcoming 2026-2027 Schedule Forecast (Timestral-209M):\n` +
+        myTeamForecast.forecast
+          .map(
+            (g) =>
+              `- ${g.date} (${g.home_away}) vs ${g.opponent}: Win Prob ${g.win_probability}%, Projected Score ${g.team_score.median}-${g.opponent_score.median}, Tag: ${g.coaching_tag}`
+          )
+          .join("\n")
+      : "";
+
+    const combinedContext = [timestralSummary, context].filter(Boolean).join("\n\n");
+
     try {
       const response = await api.askCoach({
         question: userMessage,
-        context: context,
-        team_id: myTeamId || undefined,
+        context: combinedContext,
+        team_id: myTeam?.id || undefined,
         season: currentSeason,
       });
 
@@ -117,9 +139,32 @@ export default function CoachPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <MessageSquare className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold">Coach's Corner</h1>
+              <div>
+                <h1 className="text-3xl font-bold">
+                  {myTeam ? `${myTeam.name} Coach's Corner` : "Coach's Corner"}
+                </h1>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  AI tactical assistant anchored to {myTeam?.name || "Högsbo"} roster &amp; Timestral-209M schedule forecast
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
+              <div className="flex gap-1 bg-muted p-1 rounded-lg mr-2">
+                <Button
+                  size="sm"
+                  variant={currentLeague === "Men" ? "default" : "ghost"}
+                  onClick={() => setCurrentLeague("Men")}
+                >
+                  SBL Herr
+                </Button>
+                <Button
+                  size="sm"
+                  variant={currentLeague === "Women" ? "default" : "ghost"}
+                  onClick={() => setCurrentLeague("Women")}
+                >
+                  SBL Dam
+                </Button>
+              </div>
               {modelInfo && (
                 <Badge variant="secondary">
                   <Bot className="w-4 h-4 mr-1" />
@@ -145,20 +190,35 @@ export default function CoachPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Dribbble className="w-5 h-5" />
-                Team Context
+                Focus Team Context
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Current Team */}
               <div>
-                <label className="text-sm font-medium mb-2 block">Your Team</label>
+                <label className="text-sm font-medium mb-2 block">Primary Focus Team</label>
                 {myTeam ? (
-                  <Badge variant="secondary" className="text-xs">
-                    {myTeam.name}
-                  </Badge>
+                  <div className="space-y-1.5">
+                    <Badge variant="default" className="text-xs">
+                      {myTeam.name} ({currentLeague})
+                    </Badge>
+                    {myTeamForecast?.forecast?.[0] && (
+                      <div className="p-2 rounded bg-muted/50 border border-border text-[11px] text-muted-foreground">
+                        <div className="font-semibold text-foreground flex items-center gap-1">
+                          <Sparkles className="w-3 h-3 text-primary" />
+                          Next Game ({myTeamForecast.forecast[0].date.split(",")[0]})
+                        </div>
+                        <div>
+                          {myTeamForecast.forecast[0].home_away} vs{" "}
+                          {myTeamForecast.forecast[0].opponent} (
+                          {myTeamForecast.forecast[0].win_probability}% Win Prob)
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    Select your team from the dashboard
+                    Loading focus team...
                   </p>
                 )}
               </div>
