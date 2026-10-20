@@ -24,13 +24,17 @@ import type {
   TimestralBacktestResponse,
 } from "@/types/api";
 
+const DEFAULT_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  (typeof window !== "undefined" ? "" : "http://127.0.0.1:8000");
+
 class ApiClient {
   private client: AxiosInstance;
 
-  constructor(baseUrl: string = "http://localhost:8000") {
+  constructor(baseUrl: string = DEFAULT_BASE_URL) {
     this.client = axios.create({
       baseURL: baseUrl,
-      timeout: 30000,
+      timeout: 60000,
       headers: {
         "Content-Type": "application/json",
       },

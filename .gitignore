@@ -5,7 +5,18 @@ build/
 dist/
 wheels/
 *.egg-info
-.env
+.pytest_cache/
+.ruff_cache/
 
-# Virtual environments
+# Environment & secrets (never commit)
+.env
+.env.*
+!.env.example
+web/.env
+web/.env.*
+
+# Virtual environments & dependencies
 .venv
+web/node_modules/
+web/.next/
+web/out/

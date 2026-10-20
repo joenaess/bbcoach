@@ -436,7 +436,23 @@ bbcoach/
 - AWS (EC2 + nginx)
 - Google Cloud Run
 
-### Environment Setup for Production
+### Private Coach Testing via Tailscale (Zero Open Router Ports)
+
+Because `web/next.config.js` proxies `/api/:path*` and `/health` internally to `http://127.0.0.1:8000` and `web/lib/api-client.ts` uses relative browser URLs by default, you only need to expose **port 3000** when testing with coaches over a private Tailscale network:
+
+1. **Start Backend Privately (localhost only):**
+   ```bash
+   uv run uvicorn api.main:app --host 127.0.0.1 --port 8000
+   ```
+2. **Start Frontend on Port 3000:**
+   ```bash
+   cd web && npm run dev -- --hostname 0.0.0.0 --port 3000
+   ```
+3. **Share Privately via Tailscale Node Sharing:**
+   - Share your machine node in the Tailscale Admin Console with invited coaches, or run `tailscale serve 3000`.
+   - Coaches can access `http://<tailscale-ip>:3000` (or `https://<machine>.<tailnet>.ts.net`) from their laptop, tablet, or phone without exposing port 8000 or opening any firewall ports.
+
+### Environment Setup for Cloud Production
 
 1. **Backend:**
    - Set environment variables
@@ -444,8 +460,7 @@ bbcoach/
    - Ensure `CORS_ORIGINS` includes your frontend domain
 
 2. **Frontend:**
-   - Update `next.config.js` to point to production API
-   - Set `NEXT_PUBLIC_API_URL` if needed
+   - Set `BACKEND_INTERNAL_URL` (for server-side rewrites) or `NEXT_PUBLIC_API_URL` if needed
    - Build: `npm run build`
    - Start: `npm start`
 
